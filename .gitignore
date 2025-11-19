@@ -1,0 +1,139 @@
+# Compiled Object files
+*.o
+*.obj
+*.elf
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+Output/stackcore
+Output/stackcore.exe
+
+# Game Data Files
+game.dat
+game_state.dat
+imgui.ini
+Output/imgui.ini
+Output/game.dat
+Output/game_state.dat
+
+# Build directories
+obj/
+build/
+Build/
+Debug/
+Release/
+
+# Keep asset directories in Output/ but ignore their contents, except for .gitkeep
+!Output/images/
+Output/images/*
+!Output/images/.gitkeep
+!Output/sounds/
+Output/sounds/*
+!Output/sounds/.gitkeep
+!Output/fonts/
+Output/fonts/*
+!Output/fonts/.gitkeep
+
+
+# SDL2 DLLs (Windows)
+SDL2.dll
+SDL2_image.dll
+SDL2_mixer.dll
+SDL2_ttf.dll
+
+# IDE and Editor files
+.vscode/
+.vs/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+*.suo
+*.user
+.idea/
+*.pro.user
+*.autosave
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+
+# Package managers
+.conan/
+vcpkg_installed/
+
+# Coverage reports
+*.gcov
+*.gcda
+*.gcno
+coverage/
+
+# Profiling data
+*.prof
+gmon.out
+
+# Documentation build
+docs/_build/
+docs/html/
+docs/latex/
+
+# Windows specific
+*.pdb
+*.ilk
+*.exp
+*.idb
+*.res
+resource.res
+
+# Linux specific
+*.so.*
+.depend
+
+# Development tools
+.gdb_history
+.valgrind
+
+# Custom build scripts output
+installer/
+dist/
+package/
+SECURITY.md
+UNREAL_MIGRATION.md
