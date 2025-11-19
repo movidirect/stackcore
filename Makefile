@@ -8,13 +8,22 @@ DEPS = $(wildcard src/*.h)
 SRC = $(wildcard src/*.cpp)
 
 ifeq ($(OS),Windows_NT)
-    SRC += resource.res
+
     LDLIBS = -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lSDL2_image -lSDL2_mixer -mwindows
     LIB_DIR = lib/SDL2
     INCLUDE_DIR = include
     TARGET = Output/stackcore.exe
     CLEAN_CMD = powershell -Command "Remove-Item -Recurse -Force obj" && rm -f $(TARGET)
     PLATFORM_CXXFLAGS = -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/SDL2 -L$(LIB_DIR)
+
+    # Windows specific resource compilation
+    WIN_RESOURCE_FILE = resource.res
+    WIN_RESOURCE_SRC = resource.rc
+    WIN_SPECIFIC_OBJS = $(WIN_RESOURCE_FILE)
+
+    # Rule to compile resource.rc into resource.res
+    $(WIN_RESOURCE_FILE): $(WIN_RESOURCE_SRC)
+	    windres $< -O coff -o $@
 else
     # Use pkg-config to get SDL2 flags for non-Windows systems for more robustness
     SDL2_CFLAGS = $(shell pkg-config --cflags sdl2 SDL2_image SDL2_mixer)
@@ -46,7 +55,11 @@ SRC += $(IMGUI_DIR)/imgui_impl_sdl2.cpp $(IMGUI_DIR)/imgui_impl_opengl2.cpp
 
 # Object files
 # Change the .cpp extension to .o and place the objects in OBJDIR
-OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
+ifeq ($(OS),Windows_NT)
+    OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o) $(WIN_SPECIFIC_OBJS)
+else
+    OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
+endif
 
 # Default target
 all: release
