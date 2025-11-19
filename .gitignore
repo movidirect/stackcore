@@ -28,14 +28,6 @@
 Output/stackcore
 Output/stackcore.exe
 
-# Game Data Files
-game.dat
-game_state.dat
-imgui.ini
-Output/imgui.ini
-Output/game.dat
-Output/game_state.dat
-
 # Build directories
 obj/
 build/
@@ -43,23 +35,6 @@ Build/
 Debug/
 Release/
 
-# Keep asset directories in Output/ but ignore their contents, except for .gitkeep
-!Output/images/
-Output/images/*
-!Output/images/.gitkeep
-!Output/sounds/
-Output/sounds/*
-!Output/sounds/.gitkeep
-!Output/fonts/
-Output/fonts/*
-!Output/fonts/.gitkeep
-
-
-# SDL2 DLLs (Windows)
-SDL2.dll
-SDL2_image.dll
-SDL2_mixer.dll
-SDL2_ttf.dll
 
 # IDE and Editor files
 .vscode/
