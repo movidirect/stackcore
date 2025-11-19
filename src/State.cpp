@@ -17,6 +17,7 @@
 #include "State.h"
 #include <iostream>
 #include "Color.h"
+#include <cmath>
 
 State::State(SDL_Window* window, SDL_GLContext glContext)
 {

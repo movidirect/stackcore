@@ -121,7 +121,6 @@ docs/latex/
 *.exp
 *.idb
 *.res
-resource.res
 
 # Linux specific
 *.so.*
