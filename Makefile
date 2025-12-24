@@ -1,4 +1,5 @@
 CXX = g++
+#Copyright (C) 2023-2025 Jose R Arenas
 
 # Base flags, without platform specifics
 BASE_CXXFLAGS = -Wall -Wextra -std=c++17 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
