@@ -35,6 +35,16 @@ private:
     int lightDirLoc;
     int viewPosLoc;
     
+    // Starfield background
+    struct Star {
+        Vector3 position;
+        float speed;
+        Color color;
+    };
+    std::vector<Star> stars;
+    void initStars();
+    void drawStars(float deltaTime);
+    
     // Constants for rendering (matching Game's limits)
     const float SCENE_LIMIT = 4.5f;
     const float CELL_SIZE = 1.0f;

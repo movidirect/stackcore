@@ -14,6 +14,9 @@ Renderer::~Renderer() {
 }
 
 void Renderer::init() {
+    // Initialize stars
+    initStars();
+
     // Load lighting shader
     lightingShader = LoadShader("shaders/lighting.vs", "shaders/lighting.fs");
 
@@ -25,6 +28,45 @@ void Renderer::init() {
     // Set light direction (pointing slightly down and left)
     Vector3 lightDir = { -1.0f, -1.0f, -1.0f };
     SetShaderValue(lightingShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+}
+
+void Renderer::initStars() {
+    stars.clear();
+    // Create 300 stars scattered in a wide area behind the grid
+    for (int i = 0; i < 300; i++) {
+        Star s;
+        // Distribute stars widely in X and Y, and deeply in Z (behind the grid)
+        s.position.x = (float)GetRandomValue(-400, 400) / 10.0f;
+        s.position.y = (float)GetRandomValue(-400, 400) / 10.0f;
+        s.position.z = (float)GetRandomValue(-600, -100) / 10.0f; 
+        
+        // Varying speeds for parallax effect
+        s.speed = (float)GetRandomValue(5, 20) / 100.0f;
+        
+        // Randomize brightness (alpha) for twinkling effect
+        unsigned char brightness = GetRandomValue(100, 255);
+        s.color = { brightness, brightness, brightness, 255 }; // White to grey stars
+        
+        stars.push_back(s);
+    }
+}
+
+void Renderer::drawStars(float deltaTime) {
+    for (auto& star : stars) {
+        // Move stars forward on the Z axis
+        star.position.z += star.speed * deltaTime * 60.0f; // Scale by roughly 60fps to match typical speed
+        
+        // If a star passes the camera, reset it far back
+        if (star.position.z > camera.position.z + 5.0f) {
+            star.position.z = (float)GetRandomValue(-600, -500) / 10.0f;
+            star.position.x = (float)GetRandomValue(-400, 400) / 10.0f;
+            star.position.y = (float)GetRandomValue(-400, 400) / 10.0f;
+        }
+        
+        // Draw the star as a tiny cube or point
+        // Using a tiny point/box makes it look like a star
+        DrawCubeV(star.position, (Vector3){0.05f, 0.05f, 0.05f}, star.color);
+    }
 }
 
 void Renderer::render(
@@ -48,6 +90,9 @@ void Renderer::render(
 
     BeginMode3D(camera);
     
+    // Draw the animated starfield
+    drawStars(GetFrameTime());
+
     rlPushMatrix();
     rlRotatef(cameraAngleX, 1.0f, 0.0f, 0.0f);
     rlRotatef(cameraAngleY, 0.0f, 1.0f, 0.0f);
