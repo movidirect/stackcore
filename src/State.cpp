@@ -24,8 +24,17 @@ State::State()
 {
     rlImGuiSetup(true);
 
-    myFont = nullptr; // Let ImGui use its default font
-    smallFont = nullptr;
+    ImGuiIO& io = ImGui::GetIO();
+    // Usamos Roboto para una interfaz limpia, legible y profesional
+    myFont = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 16.0f);
+    smallFont = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 14.0f);
+    
+    if (myFont == nullptr) {
+        myFont = io.Fonts->AddFontFromFileTTF("Output/fonts/Roboto-Regular.ttf", 16.0f);
+        smallFont = io.Fonts->AddFontFromFileTTF("Output/fonts/Roboto-Regular.ttf", 14.0f);
+    }
+
+    rlImGuiReloadFonts();
 
     textureLogo = loadTexture("images/blockimage.png");
     textureGameOver = loadTexture("images/gameisover.png");
@@ -46,38 +55,41 @@ State::~State()
 
 void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, int cubesPlaced, bool gameIsOver, bool gameIspaused, bool soundEnabled, int level, int linesCleared, int linesTarget, float currentSpeed, bool showGhost, const std::vector<int>* nextBlocks, bool demoMode, bool showHelpWindow)
 {
+    if (myFont) ImGui::PushFont(myFont);
+
     ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowRounding = 0.0f;
-    style.FrameRounding = 0.0f;
-    style.GrabRounding = 0.0f;
-    style.PopupRounding = 0.0f;
-    style.ScrollbarRounding = 0.0f;
+    style.WindowRounding = 8.0f;
+    style.FrameRounding = 6.0f;
+    style.GrabRounding = 6.0f;
+    style.PopupRounding = 8.0f;
+    style.ScrollbarRounding = 6.0f;
+    style.ChildRounding = 6.0f;
 
     ImVec4* colors = style.Colors;
-    colors[ImGuiCol_Text]                   = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-    colors[ImGuiCol_TextDisabled]           = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    colors[ImGuiCol_WindowBg]               = ImVec4(0.06f, 0.06f, 0.06f, 0.94f);
-    colors[ImGuiCol_PopupBg]                = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
-    colors[ImGuiCol_Border]                 = ImVec4(0.00f, 1.00f, 1.00f, 0.50f);
+    colors[ImGuiCol_Text]                   = ImVec4(0.00f, 1.00f, 0.90f, 1.00f);
+    colors[ImGuiCol_TextDisabled]           = ImVec4(0.40f, 0.40f, 0.50f, 1.00f);
+    colors[ImGuiCol_WindowBg]               = ImVec4(0.06f, 0.05f, 0.12f, 0.94f);
+    colors[ImGuiCol_PopupBg]                = ImVec4(0.08f, 0.07f, 0.14f, 0.94f);
+    colors[ImGuiCol_Border]                 = ImVec4(0.90f, 0.10f, 0.60f, 0.80f);
     colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_FrameBg]                = ImVec4(0.00f, 0.50f, 0.50f, 0.54f);
-    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.00f, 0.80f, 0.80f, 0.40f);
-    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.00f, 1.00f, 1.00f, 0.67f);
-    colors[ImGuiCol_TitleBg]                = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
-    colors[ImGuiCol_TitleBgActive]          = ImVec4(0.00f, 0.50f, 0.50f, 1.00f);
+    colors[ImGuiCol_FrameBg]                = ImVec4(0.20f, 0.10f, 0.30f, 0.54f);
+    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.40f, 0.15f, 0.50f, 0.40f);
+    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.80f, 0.20f, 0.80f, 0.67f);
+    colors[ImGuiCol_TitleBg]                = ImVec4(0.08f, 0.06f, 0.16f, 1.00f);
+    colors[ImGuiCol_TitleBgActive]          = ImVec4(0.40f, 0.10f, 0.50f, 1.00f);
     colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
     colors[ImGuiCol_MenuBarBg]              = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
     colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
     colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
     colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-    colors[ImGuiCol_CheckMark]              = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
+    colors[ImGuiCol_CheckMark]              = ImVec4(0.00f, 1.00f, 0.80f, 1.00f);
     colors[ImGuiCol_SliderGrab]             = ImVec4(0.00f, 0.70f, 0.70f, 1.00f);
     colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-    colors[ImGuiCol_Button]                 = ImVec4(0.00f, 0.50f, 0.50f, 0.40f);
-    colors[ImGuiCol_ButtonHovered]          = ImVec4(0.00f, 0.80f, 0.80f, 1.00f);
-    colors[ImGuiCol_ButtonActive]           = ImVec4(0.00f, 0.60f, 0.60f, 1.00f);
-    colors[ImGuiCol_Header]                 = ImVec4(0.00f, 0.50f, 0.50f, 0.31f);
+    colors[ImGuiCol_Button]                 = ImVec4(0.40f, 0.10f, 0.50f, 0.40f);
+    colors[ImGuiCol_ButtonHovered]          = ImVec4(0.80f, 0.20f, 0.60f, 1.00f);
+    colors[ImGuiCol_ButtonActive]           = ImVec4(0.90f, 0.10f, 0.70f, 1.00f);
+    colors[ImGuiCol_Header]                 = ImVec4(0.30f, 0.10f, 0.40f, 0.31f);
     colors[ImGuiCol_HeaderHovered]          = ImVec4(0.00f, 0.80f, 0.80f, 0.80f);
     colors[ImGuiCol_HeaderActive]           = ImVec4(0.00f, 0.60f, 0.60f, 1.00f);
 
@@ -118,7 +130,9 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     ImGui::End();
 
     if (showHelpWindow) {
-        ImGui::SetNextWindowSize(ImVec2(400, 320), ImGuiCond_FirstUseEver);
+        ImVec2 center = ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f);
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowSize(ImVec2(450, 420), ImGuiCond_Appearing);
         ImGui::Begin("Ayuda - Controles", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::Text("StackCoreV2 - Ayuda\n\n");
         ImGui::Text("Controles principales:");
@@ -137,6 +151,8 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
         ImGui::Text("  ESC       : Salir del Juego");
         ImGui::End();
     }
+
+    if (myFont) ImGui::PopFont();
 }
 
 void State::drawOverlayImages(bool /*gameIsOver*/, bool /*gameIspaused*/)

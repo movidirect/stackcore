@@ -31,6 +31,9 @@ private:
     void drawGrid();
     
     Camera3D camera;
+    Shader lightingShader;
+    int lightDirLoc;
+    int viewPosLoc;
     
     // Constants for rendering (matching Game's limits)
     const float SCENE_LIMIT = 4.5f;

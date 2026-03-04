@@ -59,72 +59,56 @@
 5. Sube de nivel → escucha sonido de level up
 6. Game over → escucha sonido específico
 
-### 5. Sistema de Configuración Mejorado
+### 5. Sistema de Configuración y Ayuda
 **¿Qué probar?**
-- Controles de configuración funcionan
-- La interfaz muestra los nuevos controles
+- La nueva ventana de ayuda se abre con F1.
+- El modo demo se activa con TAB.
+- El modo demo se puede iniciar desde la línea de comandos.
 
 **Cómo probar:**
-1. Verifica que la interfaz muestra:
-   - "H KEY     Ghost Block"
-   - "N KEY     Next Preview"
-2. Presiona `H` → el ghost block debe desaparecer/aparecer
-3. Presiona `N` → (preparado para futuras mejoras de preview visual)
-4. Presiona `M` → toggle de sonido funciona
-5. Todos los controles existentes siguen funcionando
+1. Presiona `F1`: Debe aparecer una ventana de ImGui con la lista de controles.
+2. Presiona `TAB`: El bot de IA debe tomar el control del juego (Modo Demo).
+3. Cierra el juego y ejecútalo desde la terminal con `./Output/stackcore --demo`: El juego debe iniciar directamente con el bot activo.
+4. Verifica que al activar el modo Demo, el "Ghost Block" NO se activa automáticamente si estaba apagado.
 
 ## 🎮 Controles para Testing
 
 ```
 MOVIMIENTO Y GAMEPLAY:
-↑↓←→     : Mover bloque
-ESPACIO  : Drop rápido  
-WASD     : Rotación X,Y
-QE       : Rotación Z
+↑↓←→      : Mover bloque
+ESPACIO   : Drop rápido  
+WASD      : Rotación X,Y
+QE        : Rotación Z
 
-CONFIGURACIÓN:
-H        : Toggle Ghost Block ⭐ NUEVO
-N        : Toggle Next Preview ⭐ NUEVO  
-M        : Toggle Sound
-P        : Pause
-R        : Reset completo
+SISTEMA Y AYUDA:
+TAB       : Toggle Modo Demo (Bot AI) ⭐ CAMBIADO
+F1        : Ventana de Ayuda ⭐ NUEVO
+H         : Toggle Ghost Block
+N         : Toggle Next Preview
+M         : Toggle Sound
+P         : Pause
+R/ENTER   : Reset Juego
 
 CÁMARA:
-CTRL+WASD: Control de cámara
-ESC      : Salir
+CTRL+WASD : Control de cámara
+ESC       : Salir
 ```
 
 ## 📊 Checklist de Testing
 
-### ✅ Sistema de Niveles
-- [ ] Interfaz muestra nivel y progreso de líneas
-- [ ] Velocidad aumenta al subir de nivel
-- [ ] Sonido de level up se reproduce
-- [ ] Bonificación de puntos funciona
-- [ ] Reset mantiene progreso (solo reset completo lo borra)
-
-### ✅ Ghost Block
-- [ ] Sombra wireframe aparece correctamente
-- [ ] Se actualiza con movimientos del bloque
-- [ ] Se actualiza con rotaciones del bloque
-- [ ] Toggle H funciona para activar/desactivar
-- [ ] No interfiere con el juego normal
-
-### ✅ Sistema de Preview
-- [ ] Bloques no se repiten inmediatamente
-- [ ] Secuencia de bloques es coherente
-- [ ] Variedad adecuada de tipos de bloques
-
-### ✅ Audio Mejorado
-- [ ] Sonido de level up diferenciado
-- [ ] Sonido de line clear diferenciado
-- [ ] Todos los sonidos existentes siguen funcionando
-- [ ] Toggle de sonido afecta todos los sonidos
+### ✅ Sistema de Ayuda y Demo
+- [ ] Ventana de ayuda (F1) se muestra y oculta correctamente.
+- [ ] La tecla TAB activa/desactiva el bot de IA.
+- [ ] El parámetro `--demo` inicia el juego en modo automático.
+- [ ] El Ghost Block permanece desactivado al entrar en modo demo (si estaba apagado).
 
 ### ✅ Configuración
-- [ ] Interfaz actualizada con nuevos controles
-- [ ] Todos los toggles funcionan correctamente
-- [ ] Configuraciones se mantienen durante la sesión
+- [ ] Interfaz actualizada con nuevos controles (TAB/F1).
+- [ ] Todos los toggles funcionan correctamente.
+- [ ] No hay logs `INFO:` innecesarios en la consola al iniciar.
+
+### ✅ Instalador (Opcional en Linux)
+- [ ] Ejecutar `makensis installer.nsi` genera el archivo `StackCoreSetup.exe`.
 
 ## 🐛 Problemas Conocidos a Reportar
 

@@ -41,6 +41,8 @@ Game::Game()
     cameraZ = -16.0f;
     cameraAngleX = 0.0f;
     cameraAngleY = 0.0f;
+    targetCameraAngleX = 0.0f;
+    targetCameraAngleY = 0.0f;
     initZ = INITIAL_Z_POSITION;
 
     stackPosition = -1;  // -1 means no blocks parked, 0+ means blocks up to that level
@@ -96,6 +98,8 @@ bool Game::init()
     if (!audioManager->init()) {
         return false;
     }
+
+    renderer->init();
 
     // Initialize the GUI where the game state will be displayed
     state = new State();
@@ -173,7 +177,15 @@ void Game::handleEvents()
     if (cmds.toggleSound) audioManager->toggleSound();
     if (cmds.toggleGhost) { showGhostBlock = !showGhostBlock; audioManager->playSound(KEY_PRESS_SOUND); }
     if (cmds.toggleNext)  { showNextBlocks = !showNextBlocks; audioManager->playSound(KEY_PRESS_SOUND); }
-    if (cmds.exitGame)    { isRunning = false; saveHighScore(); }
+    
+    if (cmds.exitGame) {
+        if (showHelpWindow) {
+            showHelpWindow = false;
+        } else {
+            isRunning = false;
+            saveHighScore();
+        }
+    }
 
     if (gameIsOver || gameIsPaused) return;
 
@@ -186,23 +198,23 @@ void Game::handleEvents()
     if (cmds.moveRight) { dx =  1.0f; audioManager->playSound(KEY_PRESS_SOUND); }
 
     if (cmds.rotateX) {
-        if (cmds.ctrlPressed) cameraAngleX += 5.0f;
+        if (cmds.ctrlPressed) targetCameraAngleX += 15.0f;
         else if (block) block->tryRotateX(SCENE_LIMIT);
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     if (cmds.rotateXRev) {
-        if (cmds.ctrlPressed) cameraAngleX -= 5.0f;
+        if (cmds.ctrlPressed) targetCameraAngleX -= 15.0f;
         else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateX(SCENE_LIMIT)) break; }
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     
     if (cmds.rotateY) {
-        if (cmds.ctrlPressed) cameraAngleY += 5.0f;
+        if (cmds.ctrlPressed) targetCameraAngleY += 15.0f;
         else if (block) block->tryRotateY(SCENE_LIMIT);
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     if (cmds.rotateYRev) {
-        if (cmds.ctrlPressed) cameraAngleY -= 5.0f;
+        if (cmds.ctrlPressed) targetCameraAngleY -= 15.0f;
         else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateY(SCENE_LIMIT)) break; }
         audioManager->playSound(KEY_PRESS_SOUND);
     }
@@ -251,6 +263,10 @@ void Game::render()
 
 void Game::update() 
 {
+    // Interpolate camera angles for smooth rotation
+    cameraAngleX += (targetCameraAngleX - cameraAngleX) * 0.1f;
+    cameraAngleY += (targetCameraAngleY - cameraAngleY) * 0.1f;
+
     if (block && !gameIsOver && !gameIsPaused) {
         // Use dynamic fall speed instead of constant
         float dz = currentFallSpeed;

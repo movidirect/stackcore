@@ -10,10 +10,21 @@ Renderer::Renderer() {
 }
 
 Renderer::~Renderer() {
+    UnloadShader(lightingShader);
 }
 
 void Renderer::init() {
-    // Initialization if needed
+    // Load lighting shader
+    lightingShader = LoadShader("shaders/lighting.vs", "shaders/lighting.fs");
+
+    // Get uniform locations
+    lightingShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(lightingShader, "viewPos");
+    lightDirLoc = GetShaderLocation(lightingShader, "lightDir");
+    viewPosLoc = GetShaderLocation(lightingShader, "viewPos");
+
+    // Set light direction (pointing slightly down and left)
+    Vector3 lightDir = { -1.0f, -1.0f, -1.0f };
+    SetShaderValue(lightingShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
 }
 
 void Renderer::render(
@@ -41,6 +52,13 @@ void Renderer::render(
     rlRotatef(cameraAngleX, 1.0f, 0.0f, 0.0f);
     rlRotatef(cameraAngleY, 0.0f, 1.0f, 0.0f);
 
+    // Update camera position for shader specular reflection
+    float cameraPos[3] = { camera.position.x, camera.position.y, camera.position.z };
+    SetShaderValue(lightingShader, viewPosLoc, cameraPos, SHADER_UNIFORM_VEC3);
+
+    // Enable Lighting Shader
+    BeginShaderMode(lightingShader);
+
     // Render parked blocks
     for (const auto& parkedBlock : parkedBlocks) {
         if (parkedBlock) {
@@ -57,7 +75,9 @@ void Renderer::render(
         }
     }
 
-    // Render the grid scene
+    EndShaderMode();
+
+    // Render the grid scene (without lighting)
     drawGrid();
     
     rlPopMatrix();
@@ -80,7 +100,8 @@ void Renderer::drawGrid() {
     float size = SCENE_LIMIT;
     float cellSize = CELL_SIZE;
     int gridCount = GRID_SIZE;
-    ::Color gridColor = {0, 255, 255, 255}; // Cyan
+    ::Color gridColor = {0, 255, 255, 160}; // Cyan más sólido
+    ::Color sideGridColor = {0, 255, 255, 100}; // Mucho más visible que antes (era 40)
 
     // Render floor (XZ plane at y = -size)
     for (int i = 0; i <= gridCount; ++i) {
@@ -99,15 +120,15 @@ void Renderer::drawGrid() {
     // Render left wall (YZ plane at x = -size)
     for (int i = 0; i <= gridCount; ++i) {
         float position = -size + i * cellSize;
-        DrawLine3D((Vector3){-size, position, -size}, (Vector3){-size, position, size}, gridColor);
-        DrawLine3D((Vector3){-size, -size, position}, (Vector3){-size, size, position}, gridColor);
+        DrawLine3D((Vector3){-size, position, -size}, (Vector3){-size, position, size}, sideGridColor);
+        DrawLine3D((Vector3){-size, -size, position}, (Vector3){-size, size, position}, sideGridColor);
     }
 
     // Render right wall (YZ plane at x = size)
     for (int i = 0; i <= gridCount; ++i) {
         float position = -size + i * cellSize;
-        DrawLine3D((Vector3){size, position, -size}, (Vector3){size, position, size}, gridColor);
-        DrawLine3D((Vector3){size, -size, position}, (Vector3){size, size, position}, gridColor);
+        DrawLine3D((Vector3){size, position, -size}, (Vector3){size, position, size}, sideGridColor);
+        DrawLine3D((Vector3){size, -size, position}, (Vector3){size, size, position}, sideGridColor);
     }
 
     // Render back wall (XY plane at z = -size)

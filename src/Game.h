@@ -86,6 +86,8 @@ class Game {
         float cameraZ;
         float cameraAngleX;
         float cameraAngleY;
+        float targetCameraAngleX;
+        float targetCameraAngleY;
         float initZ;
         
         // Game constants to replace magic numbers

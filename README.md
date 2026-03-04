@@ -82,6 +82,19 @@ make windows
 ./Output/stackcore.exe
 ```
 
+### Windows Installer (from Linux)
+To create a professional Windows installer (`.exe`) from your Linux environment, you can use **NSIS** (Nullsoft Scriptable Install System):
+
+1.  **Install NSIS**:
+    ```bash
+    sudo apt install nsis
+    ```
+2.  **Generate Installer**:
+    ```bash
+    makensis installer.nsi
+    ```
+    This will generate `WindowsStackCoreSetup.exe` in the Ouput directory, ready for distribution.
+
 ## 📁 Project Structure (Decoupled Architecture)
 
 ```

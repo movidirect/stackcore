@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-03-04
+
+### Added
+- **Help Window**: New interactive help window accessible via `F1` showing all game controls.
+- **Command-line Demo Mode**: Added `--demo` or `-d` flag to start the game directly in AI mode.
+- **NSIS Installer Support**: Added `installer.nsi` script and README instructions to generate Windows installers natively from Linux.
+
+### Changed
+- **Input Mapping**: Moved Bot AI (Demo Mode) toggle from `F1` to `TAB` to make room for the Help window.
+- **Logging**: Suppressed Raylib `INFO:` trace logs by setting the default level to `LOG_WARNING` for a cleaner console output.
+
 ## [2.0.0] - 2026-03-04
 
 ### Changed

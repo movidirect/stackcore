@@ -550,7 +550,7 @@ INFO: Supported raylib modules:
 INFO:     > rcore:..... loaded (mandatory)
 INFO:     > rlgl:...... loaded (mandatory)
 INFO:     > rshapes:... loaded (optional)
-INFO:     > rtextures:. loaded (optional)
+INFO:     > rtextures:. loaded (optional)makensis installer.nsi
 INFO:     > rtext:..... loaded (optional)
 INFO:     > rmodels:... loaded (optional)
 INFO:     > raudio:.... loaded (optional)
@@ -676,7 +676,7 @@ El siguiente reto ambicioso es crear un modo demo, donde el programa juegue solo
   1. La Intercepción de Eventos (El "Teclado Fantasma")
   Actualmente tu función Game::handleEvents() pregunta directamente a la tarjeta madre: if (IsKeyPressed(KEY_LEFT)).
 
-
+makensis installer.nsi
   Para el Modo Demo, simplemente creamos una capa intermedia. En lugar de preguntar a Raylib directamente, la lógica preguntaría a una estructura de estado:
 
 
@@ -695,7 +695,7 @@ El siguiente reto ambicioso es crear un modo demo, donde el programa juegue solo
   que aparece un bloque nuevo:
 
 
-   1. Fase de Exploración: Clonar virtualmente el tablero actual y probar soltar el bloque en todas las combinaciones posibles de posiciones (X, Y) y rotaciones (Pitch, Yaw, Roll).
+   1. Fase de Exploración: Clonar virtualmente el tablero actual y probar soltar el bloque en todas las combinaciones posibles de posiciones (X, Y) y rotaciones (Pitch, Yaw, Roll).makensis installer.nsi
    2. Fase de Evaluación: Para cada posible posición final, la IA le da un "puntaje" al tablero resultante basado en reglas predefinidas:
        * ¿Hizo líneas completas? -> +1000 puntos.
        * ¿Dejó huecos (huecos inalcanzables debajo del bloque)? -> -500 puntos.
@@ -723,7 +723,7 @@ El siguiente reto ambicioso es crear un modo demo, donde el programa juegue solo
 
 
   He modificado el input para que use una evaluación lógica OR (||):
-  if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_UP))
+  if (IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEmakensis installer.nsiY_UP))
 
 
   Con esto logramos el mejor de los dos mundos:
@@ -751,7 +751,7 @@ El siguiente reto ambicioso es crear un modo demo, donde el programa juegue solo
 
   He implementado un cerebro básico aleatorio para el modo Demo. Ahora, cuando pulsas F1:
    1. El juego se reinicia.
-   2. Se activa el bloque fantasma (showGhostBlock) para que puedas visualizar dónde caerá el bloque según lo que decida el bot.
+   2. Se activa el bloque fantasma (showGhostBlock)makensis installer.nsi para que puedas visualizar dónde caerá el bloque según lo que decida el bot.
    3. Cada 15 frames (aproximadamente 4 veces por segundo), el bot "pulsa" una tecla virtual al azar: moverse en las 4 direcciones, rotar en los 3 ejes o, con una probabilidad baja, soltar
       el bloque de golpe (SPACE).
 
