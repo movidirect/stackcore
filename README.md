@@ -1,4 +1,4 @@
-# StackCore V2
+# StackCore
 
 ![StackCore Game](poster.png){width=700}
 
@@ -36,7 +36,8 @@ A modern C++ recreation of the classic 1989 Blockout game - the 3D version of Te
   - `Q / E` - Rotate block around Z axis.
   - `Space` - Hard Drop (instant land).
   - `CTRL + WASD` - Rotate camera/board perspective.
-  - `F1` - Toggle AI Bot (Demo Mode).
+  - `TAB` - Toggle AI Bot (Demo Mode).
+  - `F1` - Toggle Help Window.
   - `H` - Toggle Ghost Block.
   - `N` - Toggle Next Blocks Preview.
   - `P` - Pause game.
@@ -84,7 +85,7 @@ make windows
 ## 📁 Project Structure (Decoupled Architecture)
 
 ```
-StackCoreV2/
+StackCore/
 ├── src/                 # Source code
 │   ├── main.cpp        # Entry point
 │   ├── Game.cpp/.h     # Game Controller (Orchestrator)
@@ -124,4 +125,4 @@ This project is licensed under the GPL-3.0 - see the [LICENSE](LICENSE) file for
 
 ---
 
-**Enjoy playing StackCore V2!** 🎮
+**Enjoy playing StackCore!** 🎮

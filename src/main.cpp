@@ -18,10 +18,21 @@
 #include "Game.h"
 #include <iostream>
 
-int main() {
+int main(int argc, char* argv[]) {
     Game game;
 
+    bool startDemo = false;
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--demo" || arg == "-d") {
+            startDemo = true;
+        }
+    }
+
     if (game.init()) {
+        if (startDemo) {
+            game.setDemoMode(true);
+        }
         game.run();
     }
 

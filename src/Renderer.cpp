@@ -27,9 +27,8 @@ void Renderer::render(
     bool gameIsOver, bool gameIsPaused, bool soundEnabled,
     int currentLevel, int linesCleared, int targetLinesForNextLevel,
     float currentFallSpeed, bool showGhostBlock, std::vector<int>* nextBlockTypes,
-    bool demoMode
-) {
-    // Update camera position based on current logic
+    bool demoMode, bool showHelpWindow
+    ) {    // Update camera position based on current logic
     camera.position = (Vector3){ -cameraX, -cameraY, -cameraZ };
     camera.target = (Vector3){ -cameraX, -cameraY, 0.0f };
     
@@ -67,10 +66,11 @@ void Renderer::render(
 
     // Render the GUI (rlImGui)
     rlImGuiBegin();
-    state->draw(stackPosition, score, highScore, blockCount, cubeCount, 
-                gameIsOver, gameIsPaused, soundEnabled, 
-                currentLevel, linesCleared, targetLinesForNextLevel, 
-                currentFallSpeed, showGhostBlock, nextBlockTypes, demoMode);
+    state->draw(stackPosition, score, highScore, blockCount, cubeCount,
+                gameIsOver, gameIsPaused, soundEnabled,
+                currentLevel, linesCleared, targetLinesForNextLevel,
+                currentFallSpeed, showGhostBlock, nextBlockTypes,
+                demoMode, showHelpWindow);
     rlImGuiEnd();
 
     EndDrawing();

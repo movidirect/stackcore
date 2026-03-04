@@ -32,7 +32,8 @@ GameCommands InputHandler::getPlayerCommands() {
     cmds.toggleSound = IsKeyPressed(KEY_M);
     cmds.toggleGhost = IsKeyPressed(KEY_H);
     cmds.toggleNext  = IsKeyPressed(KEY_N);
-    cmds.toggleDemo  = IsKeyPressed(KEY_F1);
+    cmds.toggleDemo  = IsKeyPressed(KEY_TAB);
+    cmds.toggleHelp  = IsKeyPressed(KEY_F1);
     cmds.exitGame    = IsKeyPressed(KEY_ESCAPE);
 
     return cmds;

@@ -44,7 +44,7 @@ State::~State()
     rlImGuiShutdown();
 }
 
-void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, int cubesPlaced, bool gameIsOver, bool gameIspaused, bool soundEnabled, int level, int linesCleared, int linesTarget, float currentSpeed, bool showGhost, const std::vector<int>* nextBlocks, bool demoMode)
+void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, int cubesPlaced, bool gameIsOver, bool gameIspaused, bool soundEnabled, int level, int linesCleared, int linesTarget, float currentSpeed, bool showGhost, const std::vector<int>* nextBlocks, bool demoMode, bool showHelpWindow)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
@@ -116,6 +116,27 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     drawControlsHelp();
 
     ImGui::End();
+
+    if (showHelpWindow) {
+        ImGui::SetNextWindowSize(ImVec2(400, 320), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Ayuda - Controles", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("StackCoreV2 - Ayuda\n\n");
+        ImGui::Text("Controles principales:");
+        ImGui::Text("  Flechas   : Mover Bloque");
+        ImGui::Text("  W/S       : Rotar en X");
+        ImGui::Text("  A/D       : Rotar en Y");
+        ImGui::Text("  Q/E       : Rotar en Z");
+        ImGui::Text("  ESPACIO   : Caida rapida");
+        ImGui::Text("  TAB       : Activar/Desactivar Bot (Modo Demo)");
+        ImGui::Text("  F1        : Mostrar esta ayuda");
+        ImGui::Text("  P         : Pausar/Reanudar");
+        ImGui::Text("  R/ENTER   : Reiniciar Juego");
+        ImGui::Text("  H         : Activar/Desactivar Ghost Block");
+        ImGui::Text("  N         : Mostrar/Ocultar siguiente bloque");
+        ImGui::Text("  M         : Activar/Desactivar Sonido");
+        ImGui::Text("  ESC       : Salir del Juego");
+        ImGui::End();
+    }
 }
 
 void State::drawOverlayImages(bool /*gameIsOver*/, bool /*gameIspaused*/)
@@ -231,7 +252,7 @@ void State::drawControlsHelp()
     ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("QE:     Rotate Z"); y += step;
     ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("H: Ghost | M: Sound"); y += step;
     ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("P: Pause | R: Reset"); y += step;
-    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("F1:     Toggle DEMO"); 
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("TAB: Demo | F1: Help"); 
 
     if (smallFont) ImGui::PopFont();
 }

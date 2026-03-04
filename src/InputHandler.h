@@ -24,6 +24,7 @@ struct GameCommands {
     bool toggleGhost = false;
     bool toggleNext = false;
     bool toggleDemo = false;
+    bool toggleHelp = false;
     bool exitGame = false;
 };
 

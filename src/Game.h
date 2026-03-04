@@ -35,6 +35,7 @@ class Game {
         ~Game();
         void run();
         bool init();
+        void setDemoMode(bool enable);
     private:
         friend class BotAI;
         BotAI* bot;
@@ -62,6 +63,7 @@ class Game {
         bool gameIsPaused;
         bool isRunning;
         bool demoMode;           // Variable para el modo IA
+        bool showHelpWindow;     // Ventana de ayuda
         
         float currentBlockX;
         float currentBlockY;

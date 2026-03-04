@@ -50,6 +50,7 @@ Game::Game()
     gameIsOver = false;
     gameIsPaused = false;
     demoMode = false;
+    showHelpWindow = false;
     
     // Inicializar el bot de IA
     bot = new BotAI(this);
@@ -86,6 +87,7 @@ Game::~Game()
 bool Game::init() 
 {
     // Initialize Raylib window and audio
+    SetTraceLogLevel(LOG_WARNING);
     InitWindow(800, 600, "StackCore Game");
     SetExitKey(0); // Disable ESC key closing the window
     ChangeDirectory(GetApplicationDirectory());
@@ -159,10 +161,10 @@ void Game::handleEvents()
         demoMode = !demoMode;
         if (demoMode) {
             resetGame(true);
-            showGhostBlock = true;
         }
     }
 
+    if (cmds.toggleHelp) showHelpWindow = !showHelpWindow;
     if (cmds.togglePause) gameIsPaused = !gameIsPaused;
     if (cmds.resetGame) {
         if (gameIsOver) resetGame();
@@ -241,7 +243,7 @@ void Game::render()
         gameIsOver, gameIsPaused, audioManager->isSoundEnabled(),
         currentLevel, linesCleared, targetLinesForNextLevel,
         currentFallSpeed, showGhostBlock, &nextBlockTypes,
-        demoMode
+        demoMode, showHelpWindow
     );
 
     if (ghostBlock) delete ghostBlock;
@@ -349,16 +351,19 @@ void Game::resetGame(bool clearAll)
 void Game::dropBlock() 
 {
     if (block && !gameIsOver){
+        int dropDistance = 0;
         while (true) {
             if (!checkCollisionWithWalls(block, MANUAL_DROP_SPEED) && !board->checkCollision(block, MANUAL_DROP_SPEED)) {
                 block->move(0.0f, 0.0f, MANUAL_DROP_SPEED);  // Use constant instead of magic number
+                dropDistance++;
             } else {
                 // Collision detected: Align and park the block using Board
                 board->parkBlock(block);
 
                 blockCount++;
                 cubeCount  += block->getCubeCount();
-                score += block->getCubeCount() + blockCount;
+                score += block->getCubeCount() * currentLevel;
+                score += dropDistance * 2; // Hard drop bonus
 
                 if (!audioManager->isPlaying(PARKED_SOUND)) {
                     audioManager->playSound(PARKED_SOUND);
@@ -369,7 +374,21 @@ void Game::dropBlock()
                     linesCleared += lines;
                     audioManager->playSound(LINE_CLEAR_SOUND);
                     updateLevel();
-                    score += lines * LEVEL_CLEAR_BONUS;
+                    
+                    int lineScore = 0;
+                    switch (lines) {
+                        case 1: lineScore = 100; break;
+                        case 2: lineScore = 300; break;
+                        case 3: lineScore = 500; break;
+                        case 4: lineScore = 800; break; // Blockout!
+                        default: lineScore = 1000; break; 
+                    }
+                    score += lineScore * currentLevel;
+                    
+                    // Perfect Clear Bonus
+                    if (board->getParkedBlocks().empty()) {
+                        score += 10000 * currentLevel;
+                    }
                 }
                 
                 // Calculate stack position after blocks have potentially dropped
@@ -454,6 +473,10 @@ void Game::saveHighScore()
      
      return ghostBlock;
  }
+ 
+void Game::setDemoMode(bool enable) {
+    demoMode = enable;
+}
  
 
 

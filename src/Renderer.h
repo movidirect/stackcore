@@ -24,7 +24,7 @@ public:
         bool gameIsOver, bool gameIsPaused, bool soundEnabled,
         int currentLevel, int linesCleared, int targetLinesForNextLevel,
         float currentFallSpeed, bool showGhostBlock, std::vector<int>* nextBlockTypes,
-        bool demoMode
+        bool demoMode, bool showHelpWindow
     );
 
 private:

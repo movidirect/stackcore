@@ -26,7 +26,7 @@ class State {
 public:
     State();
     ~State();
-    void draw(int stackPosition,int score,int highScore,int cubesPlaced,int blocksPlaced, bool gameIsOver, bool paused, bool soundEnabled, int level = 1, int linesCleared = 0, int linesTarget = 10, float currentSpeed = 0.02f, bool showGhost = true, const std::vector<int>* nextBlocks = nullptr, bool demoMode = false);
+    void draw(int stackPosition,int score,int highScore,int cubesPlaced,int blocksPlaced, bool gameIsOver, bool paused, bool soundEnabled, int level = 1, int linesCleared = 0, int linesTarget = 10, float currentSpeed = 0.02f, bool showGhost = true, const std::vector<int>* nextBlocks = nullptr, bool demoMode = false, bool showHelpWindow = false);
     void drawOverlayImages(bool gameIsOver, bool paused);
     void render();
 
