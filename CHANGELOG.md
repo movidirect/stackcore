@@ -7,10 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-03-04
+
+### Changed
+- **Major Migration**: Switched from SDL2/OpenGL to **Raylib 5.0**.
+- **Refactored Architecture**: Decoupled the monolithic `Game` class into specialized systems:
+  - `AudioManager`: Handles all Raylib audio streams and sound logic.
+  - `Renderer`: Manages 3D camera, grid rendering, and scene drawing.
+  - `InputHandler`: Abstrae keyboard events and provides a unified command system.
+  - `Board`: Encapsulates 3D grid logic, collision detection, and layer clearing.
+- **Improved Game Mechanics**: Implemented **Classic 3D Tetris** layer clearing. Completing a layer now only removes those 81 cubes and drops everything above one level, instead of wiping the entire board.
+
 ### Added
-- Open source release preparation
-- Comprehensive documentation (README, CONTRIBUTING, LICENSE)
-- Enhanced build system with better cross-platform support
+- **Bot AI (Demo Mode)**: Advanced AI using predictive evaluation (holes, height, bumpiness) to play autonomously.
+- **Ghost Block**: Real-time visualization of block landing position.
+- **Next Block Preview**: Queue system showing the next 3 incoming blocks.
+- **Progressive Difficulty**: Dynamic speed scaling and level progression system.
+- **rlImGui Integration**: Modernized UI backend for smoother ImGui integration with Raylib.
+
+### Technical Improvements
+- Added **Include Guards** to all header files to prevent multiple inclusion errors.
+- Improved memory safety by using modern C++ patterns and explicit cleanup in decoupled destructors.
+- Centralized game constants in `Game.h` to eliminate magic numbers.
 
 ## [1.0.0] - 2024-12-XX
 

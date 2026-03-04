@@ -127,7 +127,7 @@ void Data::loadGameState(
     int highScore, 
     bool gameIsOver, 
     bool gameIsPaused, 
-    std::vector<Block*>& parkedBlocks)
+    const std::vector<Block*>& parkedBlocks)
 {
 
     std::ofstream file("game_state.dat", std::ios::binary);

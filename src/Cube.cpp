@@ -15,7 +15,8 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Cube.h"
-#include "SDLManager.h"
+#include <raylib.h>
+#include "GameColor.h"
 #include "Utils.h"
 
 Cube::Cube(float xPos, float yPos, float zPos, float cubeSize)
@@ -32,10 +33,24 @@ void Cube::render(bool wireframe) const{
     if(!wireframe){
         mapDepth = Utils::mapDepth(static_cast<int>(Utils::round(z)));
     }
-    Color color = Color::getDeepthColor(mapDepth);
-    SDLManager::drawCube(wireframe, x, y, z, size, color.getR(), color.getG(), color.getB());
+    GameColor color = GameColor::getDeepthGameColor(mapDepth);
+    
+    // Raylib conversion: Raylib Colors are structs (r, g, b, a) 0-255
+    ::Color rayColor = { 
+        static_cast<unsigned char>(color.getR() * 255), 
+        static_cast<unsigned char>(color.getG() * 255), 
+        static_cast<unsigned char>(color.getB() * 255), 
+        255 
+    };
 
+    Vector3 pos = { x, y, z };
 
+    if (wireframe) {
+        DrawCubeWires(pos, size, size, size, WHITE);
+    } else {
+        DrawCube(pos, size, size, size, rayColor);
+        DrawCubeWires(pos, size, size, size, WHITE); // Cambiado de DARKGRAY a WHITE
+    }
 }
 
 void Cube::move(float dx, float dy, float dz) {

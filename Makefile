@@ -1,90 +1,73 @@
-CXX = g++
-#Copyright (C) 2023-2025 Jose R Arenas
+# Copyright (C) 2023-2025 Jose R Arenas
 
-# Base flags, without platform specifics
-BASE_CXXFLAGS = -Wall -Wextra -std=c++17 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+# Compilers
+CXX_LINUX = g++
+CXX_WIN = x86_64-w64-mingw32-g++
+WINDRES = x86_64-w64-mingw32-windres
 
+# Base flags
 IMGUI_DIR = imgui
+BASE_CXXFLAGS = -Wall -Wextra -std=c++17 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -DNO_FONT_AWESOME -O2 -DNDEBUG -Wformat -Wformat-security -D_FORTIFY_SOURCE=2
+
+# Linux specific
+RAYLIB_CFLAGS_LINUX = $(shell pkg-config --cflags raylib 2>/dev/null || echo "-I/usr/local/include")
+RAYLIB_LIBS_LINUX = $(shell pkg-config --libs raylib 2>/dev/null || echo "-lraylib")
+CXXFLAGS_LINUX = $(BASE_CXXFLAGS) -fstack-protector-strong $(RAYLIB_CFLAGS_LINUX)
+LDLIBS_LINUX = $(RAYLIB_LIBS_LINUX) -lGL -lm -lpthread -ldl -lrt -lX11
+TARGET_LINUX = Output/stackcore
+
+# Windows specific
+LIB_DIR_WIN = lib/raylib
+INCLUDE_DIR_WIN = include/raylib
+CXXFLAGS_WIN = $(BASE_CXXFLAGS) -I$(INCLUDE_DIR_WIN) -L$(LIB_DIR_WIN) -static -static-libgcc -static-libstdc++
+LDLIBS_WIN = -lraylib -lopengl32 -lgdi32 -lwinmm -mwindows -lpthread
+TARGET_WIN = Output/stackcore.exe
+WIN_RESOURCE_FILE = obj/windows/resource.res
+WIN_RESOURCE_SRC = resource.rc
+
+# Sources
 DEPS = $(wildcard src/*.h)
 SRC = $(wildcard src/*.cpp)
-
-ifeq ($(OS),Windows_NT)
-
-    LDLIBS = -lmingw32 -lSDL2main -lSDL2 -lopengl32 -lglu32 -lSDL2_image -lSDL2_mixer -mwindows
-    LIB_DIR = lib/SDL2
-    INCLUDE_DIR = include
-    TARGET = Output/stackcore.exe
-    CLEAN_CMD = powershell -Command "Remove-Item -Recurse -Force obj" && rm -f $(TARGET)
-    PLATFORM_CXXFLAGS = -I$(INCLUDE_DIR) -I$(INCLUDE_DIR)/SDL2 -L$(LIB_DIR)
-
-    # Windows specific resource compilation
-    WIN_RESOURCE_FILE = resource.res
-    WIN_RESOURCE_SRC = resource.rc
-    WIN_SPECIFIC_OBJS = $(WIN_RESOURCE_FILE)
-
-    # Rule to compile resource.rc into resource.res
-    $(WIN_RESOURCE_FILE): $(WIN_RESOURCE_SRC)
-	    windres $< -O coff -o $@
-else
-    # Use pkg-config to get SDL2 flags for non-Windows systems for more robustness
-    SDL2_CFLAGS = $(shell pkg-config --cflags sdl2 SDL2_image SDL2_mixer)
-    SDL2_LIBS = $(shell pkg-config --libs sdl2 SDL2_image SDL2_mixer)
-    LDLIBS = $(SDL2_LIBS) -lGL -lGLU
-    TARGET = Output/stackcore
-    CLEAN_CMD = rm -rf obj && rm -f $(TARGET)
-    PLATFORM_CXXFLAGS = $(SDL2_CFLAGS)
-endif
-
-# Common flags including platform specifics
-COMMON_CXXFLAGS = $(BASE_CXXFLAGS) $(PLATFORM_CXXFLAGS)
-
-# Release flags
-RELEASE_CXXFLAGS = $(COMMON_CXXFLAGS) -O2 -DNDEBUG -fstack-protector-strong -Wformat -Wformat-security -D_FORTIFY_SOURCE=2
-
-# Debug flags
-DEBUG_CXXFLAGS = $(COMMON_CXXFLAGS) -g
-
-# Default to release build
-CXXFLAGS = $(RELEASE_CXXFLAGS)
-
-OBJDIR = obj
-
-# IMGUI sources
 SRC += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
-SRC += $(IMGUI_DIR)/imgui_impl_sdl2.cpp $(IMGUI_DIR)/imgui_impl_opengl2.cpp
+SRC += $(IMGUI_DIR)/rlImGui.cpp
 
-
-# Object files
-# Change the .cpp extension to .o and place the objects in OBJDIR
-ifeq ($(OS),Windows_NT)
-    OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o) $(WIN_SPECIFIC_OBJS)
-else
-    OBJ = $(SRC:%.cpp=$(OBJDIR)/%.o)
-endif
+# Object files mapped to separate directories
+OBJ_LINUX = $(SRC:%.cpp=obj/linux/%.o)
+OBJ_WIN = $(SRC:%.cpp=obj/windows/%.o) $(WIN_RESOURCE_FILE)
 
 # Default target
-all: release
+all: linux windows
 
-# Release target
-release: CXXFLAGS = $(RELEASE_CXXFLAGS)
-release: $(TARGET)
+linux: $(TARGET_LINUX)
+windows: $(TARGET_WIN)
 
-# Debug target
-debug: CXXFLAGS = $(DEBUG_CXXFLAGS)
-debug: $(TARGET)
-
-# Rule to link the executable
-$(TARGET): $(OBJ)
+# Link Linux executable
+$(TARGET_LINUX): $(OBJ_LINUX)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJ) $(LDLIBS)
+	$(CXX_LINUX) $(CXXFLAGS_LINUX) -o $@ $^ $(LDLIBS_LINUX)
 
-# Rule to compile each object file and ensure subdirectories exist
-$(OBJDIR)/%.o: %.cpp $(DEPS)
+# Link Windows executable
+$(TARGET_WIN): $(OBJ_WIN)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX_WIN) $(CXXFLAGS_WIN) -o $@ $^ $(LDLIBS_WIN)
+
+# Compile Linux objects
+obj/linux/%.o: %.cpp $(DEPS)
+	@mkdir -p $(dir $@)
+	$(CXX_LINUX) $(CXXFLAGS_LINUX) -c $< -o $@
+
+# Compile Windows objects
+obj/windows/%.o: %.cpp $(DEPS)
+	@mkdir -p $(dir $@)
+	$(CXX_WIN) $(CXXFLAGS_WIN) -c $< -o $@
+
+# Windows specific rule for resource compilation
+$(WIN_RESOURCE_FILE): $(WIN_RESOURCE_SRC)
+	@mkdir -p $(dir $@)
+	$(WINDRES) $< -O coff -o $@
 
 # Clean up
 clean:
-	$(CLEAN_CMD)
+	rm -rf obj $(TARGET_LINUX) $(TARGET_WIN)
 
-.PHONY: all clean release debug
+.PHONY: all clean linux windows

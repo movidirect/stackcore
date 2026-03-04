@@ -110,3 +110,6 @@ dist/
 package/
 SECURITY.md
 UNREAL_MIGRATION.md
+*.zip
+MIGRATION_PLAN_RAYLIB.md
+

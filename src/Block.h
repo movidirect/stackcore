@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#ifndef BLOCK_H
+#define BLOCK_H
+
 #include <vector>
 #include <cstdlib>
 #include "Cube.h"
@@ -45,3 +48,5 @@ private:
     int cubeCount;
      
 };
+
+#endif // BLOCK_H

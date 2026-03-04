@@ -48,7 +48,7 @@ class Data
             bool gameIsOver, 
             bool gameIsPaused, 
             //std::set<std::tuple<int, int, int>>& occupiedPositions, 
-            std::vector<Block*>& parkedBlocks
+            const std::vector<Block*>& parkedBlocks
         );
     private:
        ofstream wf;

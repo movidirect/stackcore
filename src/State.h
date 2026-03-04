@@ -17,43 +17,38 @@
 #ifndef STATE_H
 #define STATE_H
 
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_opengl2.h"
-#include <SDL2/SDL.h>
-#include <SDL_image.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <raylib.h>
+#include "rlImGui.h"
 #include <imgui.h>
 #include <vector>
 
 class State {
 public:
-    State(SDL_Window* window, SDL_GLContext glContext);
-    void draw(int stackPosition,int score,int highScore,int cubesPlaced,int blocksPlaced, bool gameIsOver, bool paused, bool soundEnabled, int level = 1, int linesCleared = 0, int linesTarget = 10, float currentSpeed = 0.02f, bool showGhost = true, const std::vector<int>* nextBlocks = nullptr);
+    State();
+    ~State();
+    void draw(int stackPosition,int score,int highScore,int cubesPlaced,int blocksPlaced, bool gameIsOver, bool paused, bool soundEnabled, int level = 1, int linesCleared = 0, int linesTarget = 10, float currentSpeed = 0.02f, bool showGhost = true, const std::vector<int>* nextBlocks = nullptr, bool demoMode = false);
+    void drawOverlayImages(bool gameIsOver, bool paused);
     void render();
 
 private:
-    void showImageInImGui(const char* name,GLuint textureID, ImVec2 position, ImVec2 size);
-    GLuint loadTexture(const char* imagePath);
+    void showImageInImGui(const char* name, Texture2D* texture, ImVec2 position, ImVec2 size);
+    Texture2D loadTexture(const char* imagePath);
     
     // New functions for organized UI panels
     void drawGameStats(int level, int linesCleared, int linesTarget, float currentSpeed);
     void drawScoreInfo(int score, int highScore, int blocks, int cubes);
     void drawControlsHelp();
     void drawNextBlocksPreview(const std::vector<int>* nextBlocks);
-    void drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool showGhost);
+    void drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool showGhost, bool demoMode = false);
     void drawEnhancedStackIndicator(int stackPosition, bool gameIsOver);
 
-    GLuint textureLogo;
-    GLuint textureGameOver;
-    GLuint texturePaused;
-    GLuint textureSoundEnabled;
-    GLuint textureSoundDisabled;
-    SDL_Window* window;
-    SDL_GLContext glContext;
+    Texture2D textureLogo;
+    Texture2D textureGameOver;
+    Texture2D texturePaused;
+    Texture2D textureSoundEnabled;
+    Texture2D textureSoundDisabled;
     ImFont* myFont;
     ImFont* smallFont;
-
 
 };
 

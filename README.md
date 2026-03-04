@@ -1,54 +1,61 @@
-# Stackcore 3D
+# StackCore V2
 
-![Stackcore Game](poster.png){width=700}
+![StackCore Game](poster.png){width=700}
 
-A modern C++ recreation of the classic 1989 Blockout game - the 3D version of Tetris! Navigate falling 3D blocks in a cylindrical well, rotating them in all dimensions to create complete horizontal layers.
+A modern C++ recreation of the classic 1989 Blockout game - the 3D version of Tetris! Built with Raylib for high performance and modern architectural standards. Navigate falling 3D blocks in a pit, rotating them in all dimensions to create complete horizontal layers.
 
 ## 🎮 Game Features
 
-- **3D Block Puzzle**: Experience Tetris in three dimensions
-- **9 Block Types**: From simple cubes to complex shapes (I-blocks, L-blocks, T-blocks, cross, 2x2 cube)
-- **Full 3D Rotation**: Rotate blocks around X, Y, and Z axes
-- **Dynamic Camera**: Control the camera with CTRL+WASD
-- **Score System**: Track blocks placed, cubes placed, and high scores
-- **Visual Level Indicator**: See your progress through the depth levels
-- **Sound Effects**: Immersive audio feedback
-- **Retro UI**: Classic LCD-style interface with ImGui
+- **3D Block Puzzle**: Experience Tetris in three dimensions (9x9x9 grid).
+- **9 Block Types**: From simple cubes to complex shapes (I, L, T, cross, 2x2 cube).
+- **Full 3D Rotation**: Rotate blocks around X, Y, and Z axes.
+- **Classic Mechanics**: Clearing a full layer (81 cubes) removes it and drops everything above, just like the original 1989 classic.
+- **Bot AI (Demo Mode)**: Watch a high-performance AI play the game using a predictive evaluation algorithm.
+- **Ghost Block**: Visualize exactly where your piece will land.
+- **Next Block Preview**: Plan ahead with a queue of upcoming blocks.
+- **Progressive Difficulty**: Dynamic speed increase and level progression.
+- **Dynamic Camera**: Rotate the entire board to find the best perspective.
+- **Retro UI**: Modern interface with an LCD-style feel using ImGui.refactoricemos la lógica para hacerla como el Tetris 3D clásico
 
 ## 🛠️ Technology Stack
 
 - **Language**: C++17
-- **Graphics**: SDL2 + OpenGL
-- **GUI**: Dear ImGui
-- **Audio**: SDL2_mixer
-- **Build System**: Makefile (cross-platform)
+- **Graphics & Audio**: [Raylib 5.0+](https://www.raylib.com/)
+- **GUI**: [Dear ImGui](https://github.com/ocornut/imgui) + [rlImGui](https://github.com/raylib-extras/rlImGui)
+- **Architecture**: Decoupled systems (AudioManager, Renderer, InputHandler, Board logic).
+- **Build System**: Makefile (cross-platform).
 
 ## 🎯 Game Mechanics
 
-- **Grid**: 9x9x9 playing field (±4.5 unit boundaries)
-- **Goal**: Fill complete horizontal layers to clear them
+- **Grid**: 9x9 horizontal grid with 9 levels of depth.
+- **Goal**: Fill a complete 9x9 layer (81 cubes) to clear it.
 - **Controls**: 
-  - `WASD` - Rotate block around X and Y axes
-  - `QE` - Rotate block around Z axis
-  - `CTRL+WASD` - Move camera
-  - `P` - Pause game
-  - `M` - Toggle sound
-  - `ESC` - Exit game
+  - `Arrows` - Move block in X/Y plane.
+  - `W / S` - Rotate block around X axis.
+  - `A / D` - Rotate block around Y axis.
+  - `Q / E` - Rotate block around Z axis.
+  - `Space` - Hard Drop (instant land).
+  - `CTRL + WASD` - Rotate camera/board perspective.
+  - `F1` - Toggle AI Bot (Demo Mode).
+  - `H` - Toggle Ghost Block.
+  - `N` - Toggle Next Blocks Preview.
+  - `P` - Pause game.
+  - `M` - Toggle sound.
+  - `R` - Reset game.
+  - `ESC` - Exit game.
 
 ## 📋 Requirements
 
-### Linux (Recommended)
+### Linux
 ```bash
+# Ubuntu/Debian
 sudo apt-get update
-sudo apt-get install build-essential pkg-config
-sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev
-sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev
+sudo apt-get install build-essential pkg-config libraylib-dev
 ```
 
 ### Windows
-- MinGW with C++17 support
-- SDL2, SDL2_image, SDL2_mixer development libraries
-- OpenGL and GLU libraries
+- MinGW-w64 with C++17 support.
+- Raylib development libraries (static linking supported in Makefile).
 
 ## 🚀 Installation & Building
 
@@ -58,14 +65,8 @@ sudo apt-get install libgl1-mesa-dev libglu1-mesa-dev
 git clone https://github.com/movidirect/stackcore.git
 cd stackcore
 
-# Install dependencies (Ubuntu/Debian)
-sudo apt-get install build-essential pkg-config libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libgl1-mesa-dev libglu1-mesa-dev
-
-# Build the game for release (optimized)
-make release
-
-# Or build for debugging
-make debug
+# Build the game
+make linux
 
 # Run the game
 ./Output/stackcore
@@ -73,80 +74,43 @@ make debug
 
 ### Windows Build
 ```bash
-# Ensure you have MinGW and required libraries
-
-# Build for release (optimized)
-make release
-
-# Or build for debugging
-make debug
+# Use MinGW and make
+make windows
 
 # Run the game
 ./Output/stackcore.exe
 ```
 
-### Clean Build
-To remove all build artifacts:
-```bash
-make clean
-```
-
-## 📁 Project Structure
+## 📁 Project Structure (Decoupled Architecture)
 
 ```
-stackcore/
+StackCoreV2/
 ├── src/                 # Source code
 │   ├── main.cpp        # Entry point
-│   ├── Game.cpp/.h     # Main game logic
-│   ├── Block.cpp/.h    # Block management
+│   ├── Game.cpp/.h     # Game Controller (Orchestrator)
+│   ├── Board.cpp/.h    # Board logic & Collision engine
+│   ├── Renderer.cpp/.h # Raylib 3D/2D Rendering system
+│   ├── AudioManager.*  # Raylib Sound & Music management
+│   ├── InputHandler.*  # Input abstraction (Player/Bot)
+│   ├── BotAI.cpp/.h    # Predictive AI algorithm
+│   ├── Block.cpp/.h    # 3D Polyminó management
 │   ├── Cube.cpp/.h     # Individual cube handling
-│   ├── SDLManager.*    # SDL2/OpenGL setup
-│   ├── State.*         # UI state management
-│   ├── Data.*          # Save/load functionality
-│   ├── Color.*         # Color management
-│   └── Utils.*         # Utility functions
+│   ├── Data.cpp/.h     # High score & Save state persistence
+│   ├── State.cpp/.h    # ImGui UI Layouts
+│   └── Utils.cpp/.h    # Mathematical & Mapping utilities
 ├── Output/             # Game assets and executable
-│   ├── fonts/         # LCD font
-│   ├── images/        # UI graphics
-│   └── sounds/        # Audio files
-├── imgui/             # Dear ImGui library
-├── lib/               # Windows libraries
-├── include/           # Header files
-├── Makefile          # Build configuration
-└── README.md         # This file
+│   ├── fonts/         # Fonts
+│   ├── images/        # Textures & Icons
+│   └── sounds/        # Audio files (MP3)
+├── imgui/             # Dear ImGui & rlImGui backend
+├── include/           # External headers (Raylib)
+├── lib/               # External libraries (Raylib)
+└── Makefile          # Cross-platform build configuration
 ```
-
-## 🎨 Block Types
-
-1. **Single Cube** - 1x1x1
-2. **I-Block 2** - 2 cubes in line
-3. **I-Block 3** - 3 cubes in line  
-4. **I-Block 4** - 4 cubes in line
-5. **L-Block** - L-shaped configuration
-6. **2x2 Cube** - 2x2x1 square
-7. **T-Block** - T-shaped configuration
-8. **Cross** - Plus-shaped configuration
-
-## 🐛 Bug Fixes
-
-This version includes several critical bug fixes:
-- ✅ Fixed rotation boundaries (blocks stay within game limits)
-- ✅ Fixed type inconsistencies (float/int precision issues)
-- ✅ Fixed memory leaks in game reset
-- ✅ Fixed random seed initialization
-- ✅ Fixed double delete protection
-- ✅ Differentiated W/S rotation controls
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-### Development Setup
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📝 License
 
@@ -154,23 +118,10 @@ This project is licensed under the GPL-3.0 - see the [LICENSE](LICENSE) file for
 
 ## 🙏 Acknowledgments
 
-- Original Blockout game by Aleksander Ustaszewski and Mirosław Zabłocki (1989)
-- SDL2 Development Libraries
-- Dear ImGui for the user interface
-- The retro gaming community for inspiration
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Open an issue on GitHub
-- Check the troubleshooting section below
-
-### Troubleshooting
-
-**Font Loading Error**: Ensure `fonts/LCD.ttf` exists in the Output directory
-**Sound Issues**: Verify SDL2_mixer is properly installed
-**Graphics Problems**: Update your OpenGL drivers
+- Original **Blockout** game (1989) for the inspiration.
+- **Raylib** for the amazing "no-nonsense" graphics library.
+- **Dear ImGui** for the powerful debug and game UI.
 
 ---
 
-**Enjoy playing Stakcore 3D!** 🎮
+**Enjoy playing StackCore V2!** 🎮

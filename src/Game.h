@@ -17,11 +17,17 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "SDLManager.h"
+#include <raylib.h>
 #include <set>
 #include "Block.h"
 #include "State.h"
 #include "Data.h"
+#include "AudioManager.h"
+#include "Renderer.h"
+#include "InputHandler.h"
+#include "Board.h"
+
+class BotAI;
 
 class Game {
     public:
@@ -30,7 +36,8 @@ class Game {
         void run();
         bool init();
     private:
-        SDLManager sdlManager;
+        friend class BotAI;
+        BotAI* bot;
         
         void handleEvents();
         void update();
@@ -38,13 +45,8 @@ class Game {
         void clean();
         void moveBlockWithCollision(float dx, float dy);
         bool checkCollisionWithWalls(Block* block, float dz);
-        bool checkCollisionWithParkedBlocks(Block* block, float dz);
-        bool isDepthLevelFull(int depthLevel);
-        bool isAnyDepthLevelFull();
         void dropBlock();
-        int calculateStackPosition();
         void resetGame(bool clearAll = false);
-        void playSound(int sound);
         void saveHighScore();
         void updateLevel();  // New function for level progression
         void generateNextBlocks();  // Generate preview blocks
@@ -58,9 +60,12 @@ class Game {
         int stackPosition;
         bool gameIsOver;
         bool gameIsPaused;
-        bool soundEnabled;
         bool isRunning;
+        bool demoMode;           // Variable para el modo IA
         
+        float currentBlockX;
+        float currentBlockY;
+
         // Configuration variables
         bool showGhostBlock;         // Toggle ghost block visibility
         bool showNextBlocks;         // Toggle next block preview
@@ -73,6 +78,7 @@ class Game {
         int linesCleared;
         int targetLinesForNextLevel;
         
+        // Camera position/rotation (Logic state)
         float cameraX;
         float cameraY;
         float cameraZ;
@@ -97,32 +103,18 @@ class Game {
         const float MAX_FALL_SPEED = -0.5f;         // Maximum fall speed limit
         const int LINES_PER_LEVEL = 10;             // Lines needed to advance to next level
         const int LEVEL_SCORE_MULTIPLIER = 100;     // Additional score per level
-
-        Mix_Music *parkedSound;
-        Mix_Music *keyPressSound;
-        Mix_Music *gameOverSound;
-        Mix_Music *levelUpSound;     // New sound for level progression
-        Mix_Music *lineClearSound;   // New sound for line clearing
-        Uint32 lastFrameTime;
         
-        std::set<std::tuple<int, int, int>> occupiedPositions;
-        std::vector<Block*> parkedBlocks;  
         State *state;
         Data *data;
         Block* block;
+        AudioManager* audioManager;
+        Renderer* renderer;
+        InputHandler* inputHandler;
+        Board* board;
         
         // Preview system for next blocks
         std::vector<int> nextBlockTypes;  // Queue of next block types
         static const int PREVIEW_COUNT = 3;  // Number of blocks to preview
-
-        enum Sounds {
-            PARKED_SOUND,
-            KEY_PRESS_SOUND,
-            GAME_OVER_SOUND,
-            LEVEL_UP_SOUND,      // New sound enum
-            LINE_CLEAR_SOUND     // New sound enum
-        };        
 };
 
 #endif // GAME_H
-

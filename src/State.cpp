@@ -16,25 +16,16 @@
 
 #include "State.h"
 #include <iostream>
-#include "Color.h"
+#include "GameColor.h"
 #include <cmath>
+#include <cstdint>
 
-State::State(SDL_Window* window, SDL_GLContext glContext)
+State::State()
 {
-    this->window = window;
-    this->glContext = glContext;
+    rlImGuiSetup(true);
 
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui_ImplSDL2_InitForOpenGL(window, glContext);
-    ImGui_ImplOpenGL2_Init();
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->Clear();
-    myFont = io.Fonts->AddFontDefault();
-    smallFont = io.Fonts->AddFontDefault();
-    if (myFont == nullptr) {
-        std::cerr << "Error loading font" << std::endl;
-    }
+    myFont = nullptr; // Let ImGui use its default font
+    smallFont = nullptr;
 
     textureLogo = loadTexture("images/blockimage.png");
     textureGameOver = loadTexture("images/gameisover.png");
@@ -43,12 +34,18 @@ State::State(SDL_Window* window, SDL_GLContext glContext)
     textureSoundDisabled = loadTexture("images/sound_disabled.png");
 }
 
-void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, int cubesPlaced, bool gameIsOver, bool gameIspaused, bool soundEnabled, int level, int linesCleared, int linesTarget, float currentSpeed, bool showGhost, const std::vector<int>* nextBlocks)
+State::~State()
 {
-    ImGui_ImplOpenGL2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
+    UnloadTexture(textureLogo);
+    UnloadTexture(textureGameOver);
+    UnloadTexture(texturePaused);
+    UnloadTexture(textureSoundEnabled);
+    UnloadTexture(textureSoundDisabled);
+    rlImGuiShutdown();
+}
 
+void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, int cubesPlaced, bool gameIsOver, bool gameIspaused, bool soundEnabled, int level, int linesCleared, int linesTarget, float currentSpeed, bool showGhost, const std::vector<int>* nextBlocks, bool demoMode)
+{
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowRounding = 0.0f;
     style.FrameRounding = 0.0f;
@@ -63,9 +60,9 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     colors[ImGuiCol_PopupBg]                = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
     colors[ImGuiCol_Border]                 = ImVec4(0.00f, 1.00f, 1.00f, 0.50f);
     colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_FrameBg]                = ImVec4(0.20f, 0.20f, 0.20f, 0.54f);
-    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.40f, 0.40f, 0.40f, 0.40f);
-    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.18f, 0.18f, 0.18f, 0.67f);
+    colors[ImGuiCol_FrameBg]                = ImVec4(0.00f, 0.50f, 0.50f, 0.54f);
+    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.00f, 0.80f, 0.80f, 0.40f);
+    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.00f, 1.00f, 1.00f, 0.67f);
     colors[ImGuiCol_TitleBg]                = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
     colors[ImGuiCol_TitleBgActive]          = ImVec4(0.00f, 0.50f, 0.50f, 1.00f);
     colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
@@ -75,7 +72,7 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
     colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
     colors[ImGuiCol_CheckMark]              = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-    colors[ImGuiCol_SliderGrab]             = ImVec4(0.00f, 0.80f, 0.80f, 1.00f);
+    colors[ImGuiCol_SliderGrab]             = ImVec4(0.00f, 0.70f, 0.70f, 1.00f);
     colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
     colors[ImGuiCol_Button]                 = ImVec4(0.00f, 0.50f, 0.50f, 0.40f);
     colors[ImGuiCol_ButtonHovered]          = ImVec4(0.00f, 0.80f, 0.80f, 1.00f);
@@ -98,75 +95,48 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     ImGui::SetNextWindowSize(ImVec2(150, 568), ImGuiCond_Always);
     ImGui::Begin("main panel", NULL, window_flags);
 
-    // Logo - positioned relative to panel
-    showImageInImGui("textureLogo", textureLogo, ImVec2(rightPanelX + 12, panelY-7), ImVec2(120.0f, 120.0f));
-    
+    // Draw Logo horizontally centered inside the main panel
+    ImGui::SetCursorPos(ImVec2((150.0f - 120.0f) * 0.5f, 5.0f));
+    showImageInImGui("textureLogo", &textureLogo, ImVec2(0,0), ImVec2(120, 120));
+
     // Game status overlays
     if (gameIsOver) {
-        showImageInImGui("textureGameOver", textureGameOver, ImVec2(rightPanelX + 3, panelY + 104), ImVec2(135.0f, 30.0f));
+        ImGui::SetCursorPos(ImVec2((150.0f - 135.0f) * 0.5f, 130.0f));
+        showImageInImGui("textureGameOver", &textureGameOver, ImVec2(0,0), ImVec2(135, 30));
     } else if (gameIspaused) {
-        showImageInImGui("texturePaused", texturePaused, ImVec2(rightPanelX + 3, panelY + 104), ImVec2(135.0f, 30.0f));
+        ImGui::SetCursorPos(ImVec2((150.0f - 135.0f) * 0.5f, 130.0f));
+        showImageInImGui("texturePaused", &texturePaused, ImVec2(0,0), ImVec2(135, 30));
     }
 
     // Draw organized sections
     drawGameStats(level, linesCleared, linesTarget, currentSpeed);
     drawScoreInfo(score, highScore, blocksPlaced, cubesPlaced);
     drawNextBlocksPreview(nextBlocks);
-    drawGameStatus(gameIsOver, gameIspaused, soundEnabled, showGhost);
+    drawGameStatus(gameIsOver, gameIspaused, soundEnabled, showGhost, demoMode);
     drawControlsHelp();
 
     ImGui::End();
-    ImGui::Render();
 }
 
-void State::showImageInImGui(const char* name, GLuint textureID, ImVec2 position, ImVec2 size)
+void State::drawOverlayImages(bool /*gameIsOver*/, bool /*gameIspaused*/)
 {
-    ImGui::SetNextWindowPos(position, ImGuiCond_Always);
-    ImGui::SetNextWindowSize(size, ImGuiCond_Always);
-
-    ImGui::Begin(name, nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground);
-
-    // Use ImGui::Image to display the texture
-    ImGui::Image(reinterpret_cast<void*>(textureID), size);
-
-    ImGui::End();
+    // Keeping this function signature to satisfy Game.cpp, but moving all drawing back inside ImGui window context.
 }
 
-GLuint State::loadTexture(const char* imagePath) 
+void State::showImageInImGui(const char* /*name*/, Texture2D* texture, ImVec2 /*position*/, ImVec2 size)
 {
-    SDL_Surface* imageSurface = IMG_Load(imagePath);
-    if (!imageSurface) {
-        std::cerr << "Error loading image " << IMG_GetError() << std::endl;
-        return 0;
-    }
+    // Usa la macro rlImGuiImageSize para dibujar la textura dentro del panel actual de ImGui
+    rlImGuiImageSize(texture, (int)size.x, (int)size.y);
+}
 
-    SDL_Surface* optimizedSurface = SDL_ConvertSurfaceFormat(imageSurface, SDL_PIXELFORMAT_RGBA32, 0);
-    if (!optimizedSurface) {
-        std::cerr << "Error optimizing image: " << IMG_GetError() << std::endl;
-        SDL_FreeSurface(imageSurface);
-        return 0;
-    }
-    SDL_FreeSurface(imageSurface);
-    imageSurface = optimizedSurface;
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageSurface->w, imageSurface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageSurface->pixels);
-
-    SDL_FreeSurface(imageSurface);  // Free the surface
-    return textureID;
+Texture2D State::loadTexture(const char* imagePath) 
+{
+    return LoadTexture(imagePath);
 }
 
 void State::render()
 {
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    // Render logic is now handled by Game::render via rlImGuiEnd()
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -175,137 +145,97 @@ void State::render()
 
 void State::drawGameStats(int level, int linesCleared, int linesTarget, float currentSpeed)
 {
-    ImGui::SetCursorPos(ImVec2(10, 140));
+    ImGui::SetCursorPos(ImVec2(10, 160)); // Subido de 175
     ImGui::Text("--- GAME STATUS ---");
-    
-    ImGui::SetCursorPos(ImVec2(10, 160));
+
+    ImGui::SetCursorPos(ImVec2(10, 178));
     ImGui::Text("Level:        %2d", level);
-    
-    ImGui::SetCursorPos(ImVec2(10, 175));
+
+    ImGui::SetCursorPos(ImVec2(10, 191));
     ImGui::Text("Progress:   %d/%d", linesCleared, linesTarget);
-    
-    
-    ImGui::SetCursorPos(ImVec2(10, 190));
-    ImGui::Text("Speed:     %.3f", -currentSpeed); // Show positive value
+
+    ImGui::SetCursorPos(ImVec2(10, 204));
+    ImGui::Text("Speed:     %.3f", -currentSpeed);
 }
 
 void State::drawScoreInfo(int score, int highScore, int blocks, int cubes)
 {
-    ImGui::SetCursorPos(ImVec2(10, 210));
+    ImGui::SetCursorPos(ImVec2(10, 225)); // Subido de 250
     ImGui::Text("--- STATISTICS ----");
-    
-    ImGui::SetCursorPos(ImVec2(10, 230));
-    if (score <= 99999) {
-        ImGui::Text("Score:    %6d", score);
-    } else {
-        ImGui::Text("Score:  %8d", score);
-    }
-    
-    ImGui::SetCursorPos(ImVec2(10, 245));
-    if (highScore <= 99999) {
-        ImGui::Text("Best:     %6d", highScore);
-    } else {
-        ImGui::Text("Best:   %8d", highScore);
-    }
-    
-    ImGui::SetCursorPos(ImVec2(10, 260));
+
+    ImGui::SetCursorPos(ImVec2(10, 243));
+    ImGui::Text("Score:    %6d", score);
+
+    ImGui::SetCursorPos(ImVec2(10, 256));
+    ImGui::Text("Best:     %6d", highScore);
+
+    ImGui::SetCursorPos(ImVec2(10, 269));
     ImGui::Text("Blocks:     %4d", blocks);
-    
-    ImGui::SetCursorPos(ImVec2(10, 275));
+
+    ImGui::SetCursorPos(ImVec2(10, 282));
     ImGui::Text("Cubes:      %4d", cubes);
-    
-    // Calculate some interesting stats
-    float cubesPerBlock = blocks > 0 ? (float)cubes / (float)blocks : 0.0f;
-    ImGui::SetCursorPos(ImVec2(10, 290));
-    ImGui::Text("Avg C/B:     %.1f", cubesPerBlock);
 }
 
 void State::drawNextBlocksPreview(const std::vector<int>* nextBlocks)
 {
-    ImGui::SetCursorPos(ImVec2(10, 315));
+    ImGui::SetCursorPos(ImVec2(10, 305)); // Subido de 340
     ImGui::Text("--- NEXT BLOCKS ---");
-    
+
     if (nextBlocks && nextBlocks->size() >= 3) {
         const char* blockNames[] = {
             "Single", "I-2", "I-3", "L-3", "L-4", "Square", "T-4", "I-4", "Cross"
         };
-        
-        ImGui::SetCursorPos(ImVec2(10, 340));
-        ImGui::Text("Next:   %s", blockNames[(*nextBlocks)[0] % 9]);
-        
-        ImGui::SetCursorPos(ImVec2(10, 355));
-        ImGui::Text("Then:   %s", blockNames[(*nextBlocks)[1] % 9]);
-        
-        ImGui::SetCursorPos(ImVec2(10, 370));
-        ImGui::Text("After:  %s", blockNames[(*nextBlocks)[2] % 9]);
-    } else {
-        ImGui::SetCursorPos(ImVec2(10, 340));
-        ImGui::Text("Preview: N/A");
+        ImGui::SetCursorPos(ImVec2(10, 323));
+        ImGui::Text("1: %s", blockNames[(*nextBlocks)[0] % 9]);
+        ImGui::SetCursorPos(ImVec2(10, 336));
+        ImGui::Text("2: %s", blockNames[(*nextBlocks)[1] % 9]);
+        ImGui::SetCursorPos(ImVec2(10, 349));
+        ImGui::Text("3: %s", blockNames[(*nextBlocks)[2] % 9]);
     }
 }
 
-void State::drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool showGhost)
+void State::drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool showGhost, bool demoMode)
 {
-    ImGui::SetCursorPos(ImVec2(10, 395));
+    ImGui::SetCursorPos(ImVec2(10, 375)); // Subido de 415
     ImGui::Text("---- SETTINGS  ----");
-    
-    ImGui::SetCursorPos(ImVec2(10, 415));
+
+    ImGui::SetCursorPos(ImVec2(10, 393));
     ImGui::Text("Sound:    %s", soundEnabled ? "ON " : "OFF");
-    
-    ImGui::SetCursorPos(ImVec2(10, 430));
+
+    ImGui::SetCursorPos(ImVec2(10, 406));
     ImGui::Text("Ghost:    %s", showGhost ? "ON " : "OFF");
-    
-    ImGui::SetCursorPos(ImVec2(10, 445));
-    if (gameIsOver) {
-        ImGui::Text("Status:   GAME OVER");
-    } else if (paused) {
-        ImGui::Text("Status:   PAUSED");
-    } else {
-        ImGui::Text("Status:   PLAYING");
+
+    ImGui::SetCursorPos(ImVec2(10, 419));
+    if (gameIsOver) ImGui::Text("Status: GAME OVER");
+    else if (paused) ImGui::Text("Status:   PAUSED");
+    else if (demoMode) {
+        float blink = 0.5f + 0.5f * sin((float)GetTime() * 6.0f);
+        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, blink), "Status: DEMO MODE");
     }
+    else ImGui::Text("Status:  PLAYING");
 }
 
 void State::drawControlsHelp()
 {
-    if (smallFont) {
-        ImGui::PushFont(smallFont);
-    }
-    
-    ImGui::SetCursorPos(ImVec2(10, 465));
+    ImGui::SetCursorPos(ImVec2(10, 445)); // Subido de 490
     ImGui::Text("---- CONTROLS -----");
+
+    if (smallFont) ImGui::PushFont(smallFont);
     
-    ImGui::SetCursorPos(ImVec2(5, 480));
-    ImGui::Text("Arrows  Move");
+    float y = 463.0f; 
+    const float step = 12.0f; 
     
-    ImGui::SetCursorPos(ImVec2(5, 490));
-    ImGui::Text("SPACE   Drop");
-    
-    ImGui::SetCursorPos(ImVec2(5, 500));
-    ImGui::Text("WASD    Rotate XY");
-    
-    ImGui::SetCursorPos(ImVec2(5, 510));
-    ImGui::Text("QE      Rotate Z");
-    
-    ImGui::SetCursorPos(ImVec2(5, 520));
-    ImGui::Text("H       Ghost");
-    
-    ImGui::SetCursorPos(ImVec2(5, 530));
-    ImGui::Text("M       Sound");
-    
-    ImGui::SetCursorPos(ImVec2(5, 540));
-    ImGui::Text("P       Pause");
-    
-    ImGui::SetCursorPos(ImVec2(5, 550));
-    ImGui::Text("R       Reset");
-    
-    if (smallFont) {
-        ImGui::PopFont();
-    }
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("Arrows: Move"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("SPACE:  Drop"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("WASD:   Rotate XY"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("QE:     Rotate Z"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("H: Ghost | M: Sound"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("P: Pause | R: Reset"); y += step;
+    ImGui::SetCursorPos(ImVec2(5, y)); ImGui::Text("F1:     Toggle DEMO"); 
+
+    if (smallFont) ImGui::PopFont();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ENHANCED STACK INDICATOR - Much better than the basic version!
-// ═══════════════════════════════════════════════════════════════
 void State::drawEnhancedStackIndicator(int stackPosition, bool gameIsOver)
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
@@ -331,11 +261,10 @@ void State::drawEnhancedStackIndicator(int stackPosition, bool gameIsOver)
     int maxLevel = stackPosition; // Maximum level with blocks
     
     // Get current time for pulsing effects
-    float time = ImGui::GetTime();
+    float time = (float)GetTime(); // Usa GetTime() de Raylib
     
     // Draw 10 levels: from level 9 (top) to level 0 (bottom)
     for (int level = 9; level >= 0; level--) {
-        //ImVec2 p = ImGui::GetCursorScreenPos();
         float currentY = posY + (9 - level) * (barHeight + spacing);  // Level 9 at top, level 0 at bottom
         
         // Determine colors and effects based on level
@@ -346,7 +275,7 @@ void State::drawEnhancedStackIndicator(int stackPosition, bool gameIsOver)
         
         if (isFilled) {
             // Get depth color
-            Color color = Color::getDeepthColor(level);  // Use level directly, not level-1
+            GameColor color = GameColor::getDeepthGameColor(level);  // Use level directly, not level-1
             baseColor = ImVec4(color.getR(), color.getG(), color.getB(), 1.0f);
             
             // Add pulsing effect for dangerous levels
