@@ -39,7 +39,7 @@ private:
     int currentRotZ;
 
     void calculateBestMove();
-    float evaluateBoardState(const std::vector<Cube>& droppedCubes);
+    float evaluateBoardState(const std::vector<Cube>& droppedCubes, const bool baseGrid[9][9][14]);
 };
 
 #endif // BOTAI_H

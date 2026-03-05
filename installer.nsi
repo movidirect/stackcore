@@ -1,6 +1,6 @@
 !include "MUI2.nsh"
 
-Name "StackCore 1.1"
+Name "StackCore"
 OutFile "Output/WindowsStackCoreSetup.exe"
 InstallDir "$PROGRAMFILES\StackCore"
 SetCompressor /SOLID lzma
@@ -63,6 +63,7 @@ Section "StackCore (Required)" SecMain
   ; Configuration and Data (Optional)
   File /nonfatal "Output\game.dat"
   File /nonfatal "Output\game_state.dat"
+  File /nonfatal "Output\imgui.ini"
   
   ; Fonts
   SetOutPath "$INSTDIR\fonts"
@@ -71,6 +72,11 @@ Section "StackCore (Required)" SecMain
   ; Images
   SetOutPath "$INSTDIR\images"
   File "Output\images\*.png"
+
+  ; Shaders
+  SetOutPath "$INSTDIR\shaders"
+  File "Output\shaders\*.fs"
+  File "Output\shaders\*.vs"
   
   ; Sounds
   SetOutPath "$INSTDIR\sounds"
@@ -110,15 +116,19 @@ Section "Uninstall"
   Delete "$INSTDIR\stackcore.exe"
   Delete "$INSTDIR\game.dat"
   Delete "$INSTDIR\game_state.dat"
+  Delete "$INSTDIR\imgui.ini"
   Delete "$INSTDIR\Uninstall.exe"
   
   Delete "$INSTDIR\fonts\*.ttf"
   Delete "$INSTDIR\images\*.png"
+  Delete "$INSTDIR\shaders\*.fs"
+  Delete "$INSTDIR\shaders\*.vs"
   Delete "$INSTDIR\sounds\*.mp3"
   
   ; Remove Directories
   RMDir "$INSTDIR\fonts"
   RMDir "$INSTDIR\images"
+  RMDir "$INSTDIR\shaders"
   RMDir "$INSTDIR\sounds"
   RMDir "$INSTDIR"
   

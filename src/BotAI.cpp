@@ -21,20 +21,29 @@ void BotAI::reset() {
     currentRotZ = 0;
 }
 
-float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes) {
-    // OPTIMIZACIÓN: Función Lambda para consultar estado sin copiar la memoria
-    auto isOccupied = [&](int x, int y, int z) {
-        // Verificar primero si es uno de los cubos recién caídos (súper rápido)
-        for (const auto& c : droppedCubes) {
-            if (static_cast<int>(Utils::round(c.x)) == x &&
-                static_cast<int>(Utils::round(c.y)) == y &&
-                static_cast<int>(Utils::round(c.z)) == z) {
-                return true;
-            }
+float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const bool baseGrid[9][9][14]) {
+    // OPTIMIZACIÓN: Copiar grid base O(1) y añadir cubos caídos
+    bool currentGrid[9][9][14];
+    std::copy(&baseGrid[0][0][0], &baseGrid[0][0][0] + 9 * 9 * 14, &currentGrid[0][0][0]);
+    
+    for (const auto& c : droppedCubes) {
+        int x = static_cast<int>(Utils::round(c.x)) + 4;
+        int y = static_cast<int>(Utils::round(c.y)) + 4;
+        int z = static_cast<int>(Utils::round(c.z)) + 4;
+        if (x >= 0 && x < 9 && y >= 0 && y < 9 && z >= 0 && z < 14) {
+            currentGrid[x][y][z] = true;
         }
-        // Si no, buscar en el tablero original
-        return game->board->getOccupiedPositions().count(std::make_tuple(x, y, z)) > 0;
-        };
+    }
+
+    auto isOccupied = [&](int x, int y, int z) {
+        int gx = x + 4;
+        int gy = y + 4;
+        int gz = z + 4;
+        if (gx >= 0 && gx < 9 && gy >= 0 && gy < 9 && gz >= 0 && gz < 14) {
+            return currentGrid[gx][gy][gz];
+        }
+        return false;
+    };
     float score = 0.0f;
     int maxZ = -5;
     int holes = 0;
@@ -134,6 +143,17 @@ void BotAI::calculateBestMove() {
     aiTargetRotY = 0;
     aiTargetRotZ = 0;
 
+    // OPTIMIZACIÓN: Cache del estado del tablero en un arreglo 3D O(1)
+    bool baseGrid[9][9][14] = {false};
+    for (const auto& pos : game->board->getOccupiedPositions()) {
+        int x = std::get<0>(pos) + 4;
+        int y = std::get<1>(pos) + 4;
+        int z = std::get<2>(pos) + 4;
+        if (x >= 0 && x < 9 && y >= 0 && y < 9 && z >= 0 && z < 14) {
+            baseGrid[x][y][z] = true;
+        }
+    }
+
     // OPTIMIZACIÓN: Cache de geometrías para evitar simular rotaciones redundantes
     std::set<std::vector<std::tuple<int, int, int>>> seenGeometries;
 
@@ -192,7 +212,7 @@ void BotAI::calculateBestMove() {
                         }
                         
                         // Evaluar el tablero resultante
-                        float score = evaluateBoardState(transBlock.cubes);
+                        float score = evaluateBoardState(transBlock.cubes, baseGrid);
                         
                         // Desempate: preferir movimientos que lleven el bloque más al fondo
                         float minDroppedZ = 4.0f;
