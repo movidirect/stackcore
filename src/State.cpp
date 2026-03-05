@@ -65,19 +65,22 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     style.ScrollbarRounding = 6.0f;
     style.ChildRounding = 6.0f;
 
+    // Color azulado principal único para paneles (fondo y borde iguales = mismo color)
+    const ImVec4 mainPanelColor = ImVec4(0.05f, 0.08f, 0.14f, 0.94f);
+
     ImVec4* colors = style.Colors;
     colors[ImGuiCol_Text]                   = ImVec4(0.00f, 1.00f, 0.90f, 1.00f);
     colors[ImGuiCol_TextDisabled]           = ImVec4(0.40f, 0.40f, 0.50f, 1.00f);
-    colors[ImGuiCol_WindowBg]               = ImVec4(0.06f, 0.05f, 0.12f, 0.94f);
-    colors[ImGuiCol_PopupBg]                = ImVec4(0.08f, 0.07f, 0.14f, 0.94f);
-    colors[ImGuiCol_Border]                 = ImVec4(0.90f, 0.10f, 0.60f, 0.80f);
+    colors[ImGuiCol_WindowBg]               = mainPanelColor;
+    colors[ImGuiCol_PopupBg]                = mainPanelColor;
+    colors[ImGuiCol_Border]                 = mainPanelColor;
     colors[ImGuiCol_BorderShadow]           = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_FrameBg]                = ImVec4(0.20f, 0.10f, 0.30f, 0.54f);
-    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.40f, 0.15f, 0.50f, 0.40f);
-    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.80f, 0.20f, 0.80f, 0.67f);
-    colors[ImGuiCol_TitleBg]                = ImVec4(0.08f, 0.06f, 0.16f, 1.00f);
-    colors[ImGuiCol_TitleBgActive]          = ImVec4(0.40f, 0.10f, 0.50f, 1.00f);
-    colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+    colors[ImGuiCol_FrameBg]                = mainPanelColor;
+    colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.08f, 0.14f, 0.22f, 0.54f);
+    colors[ImGuiCol_FrameBgActive]          = ImVec4(0.10f, 0.18f, 0.28f, 0.67f);
+    colors[ImGuiCol_TitleBg]                = mainPanelColor;
+    colors[ImGuiCol_TitleBgActive]          = mainPanelColor;
+    colors[ImGuiCol_TitleBgCollapsed]       = mainPanelColor;
     colors[ImGuiCol_MenuBarBg]              = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
     colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
     colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
@@ -86,10 +89,10 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     colors[ImGuiCol_CheckMark]              = ImVec4(0.00f, 1.00f, 0.80f, 1.00f);
     colors[ImGuiCol_SliderGrab]             = ImVec4(0.00f, 0.70f, 0.70f, 1.00f);
     colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-    colors[ImGuiCol_Button]                 = ImVec4(0.40f, 0.10f, 0.50f, 0.40f);
-    colors[ImGuiCol_ButtonHovered]          = ImVec4(0.80f, 0.20f, 0.60f, 1.00f);
-    colors[ImGuiCol_ButtonActive]           = ImVec4(0.90f, 0.10f, 0.70f, 1.00f);
-    colors[ImGuiCol_Header]                 = ImVec4(0.30f, 0.10f, 0.40f, 0.31f);
+    colors[ImGuiCol_Button]                 = mainPanelColor;
+    colors[ImGuiCol_ButtonHovered]          = ImVec4(0.08f, 0.14f, 0.22f, 1.00f);
+    colors[ImGuiCol_ButtonActive]           = ImVec4(0.10f, 0.18f, 0.28f, 1.00f);
+    colors[ImGuiCol_Header]                 = mainPanelColor;
     colors[ImGuiCol_HeaderHovered]          = ImVec4(0.00f, 0.80f, 0.80f, 0.80f);
     colors[ImGuiCol_HeaderActive]           = ImVec4(0.00f, 0.60f, 0.60f, 1.00f);
 
@@ -323,10 +326,10 @@ void State::drawEnhancedStackIndicator(int stackPosition, bool gameIsOver)
                 baseColor.z *= pulse;
             }
             
-            // Critical level gets red tint and faster pulse
+            // Critical level gets cyan tint and faster pulse (matches main theme)
             if (isCritical && !gameIsOver) {
                 float fastPulse = 0.5f + 0.5f * sin(time * 8.0f);
-                baseColor = ImVec4(1.0f * fastPulse, 0.2f, 0.2f, 1.0f);
+                baseColor = ImVec4(0.2f, 0.7f * fastPulse, 1.0f, 1.0f);
             }
             
         } else {
