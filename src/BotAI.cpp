@@ -112,8 +112,8 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes) {
     }
 
     float heightWeight    = -500.0f; 
-    float holesWeight     = -50000.0f; // Castigo MASIVO por cada hueco tapado. Nunca valdrá la pena por una línea.
-    float bumpinessWeight = -50.0f;  
+    float holesWeight     = -2000.0f; // Castigo MASIVO pero no infinito para permitir jugar
+    float bumpinessWeight = -100.0f;  
     float bottomFillWeight= 200.0f;  
     
     score += (maxZ + 4) * heightWeight;
@@ -146,9 +146,9 @@ void BotAI::calculateBestMove() {
                 
                 // Aplicar rotaciones asegurando que el motor físico real lo permita
                 bool rotationPossible = true;
-                for(int i=0; i<rX; i++) { if (!testBlock.tryRotateX(game->SCENE_LIMIT)) rotationPossible = false; }
-                for(int i=0; i<rY; i++) { if (!testBlock.tryRotateY(game->SCENE_LIMIT)) rotationPossible = false; }
-                for(int i=0; i<rZ; i++) { if (!testBlock.tryRotateZ(game->SCENE_LIMIT)) rotationPossible = false; }
+                for(int i=0; i<rX; i++) { if (!testBlock.tryRotateX(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
+                for(int i=0; i<rY; i++) { if (!testBlock.tryRotateY(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
+                for(int i=0; i<rZ; i++) { if (!testBlock.tryRotateZ(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
                 
                 // Si la combinación de giros no es físicamente posible en el punto de spawn, descartarla
                 if (!rotationPossible) continue;
@@ -176,12 +176,12 @@ void BotAI::calculateBestMove() {
                     for (float dy = -4.0f; dy <= 4.0f; dy += 1.0f) {
                         Block transBlock = testBlock;
                         transBlock.move(dx, dy, 0.0f);
-                        
+
                         // Verificar colisiones horizontales iniciales
                         if (!transBlock.isWithinBounds(game->SCENE_LIMIT) || game->board->checkCollision(&transBlock, 0.0f)) {
                             continue;
                         }
-                        
+
                         // Simular caída libre (Ghost block logic)
                         while (true) {
                             if (game->checkCollisionWithWalls(&transBlock, game->MANUAL_DROP_SPEED) ||
@@ -237,8 +237,8 @@ void BotAI::update()
     botTimer++;
     
     // Actuar cada N frames para que se vea la animación de la IA jugando
-    // Ajustado a 15 para un equilibrio entre velocidad y observación clara (~4 acciones/seg)
-    if (botTimer % 15 != 0) return; 
+    // Ajustado a 4 para que sea veloz y no lo alcance la gravedad normal antes de colocarse
+    if (botTimer % 4 != 0) return; 
 
     // 1. Ejecutar Rotaciones primero
     if (currentRotX != aiTargetRotX) {
@@ -277,4 +277,5 @@ void BotAI::update()
 
     // 3. Drop (Soltar cuando ya está alineado)
     botCommands.drop = true;
+    aiTargetCalculated = false; // Forzar recalculo para la siguiente pieza
 }

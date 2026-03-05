@@ -64,6 +64,7 @@ class Game {
         bool isRunning;
         bool demoMode;           // Variable para el modo IA
         bool showHelpWindow;     // Ventana de ayuda
+        bool isFastDropping;     // Flag para visualizar la caída rápida bloqueando inputs
         
         float currentBlockX;
         float currentBlockY;

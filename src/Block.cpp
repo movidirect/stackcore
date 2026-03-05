@@ -259,12 +259,14 @@ bool Block::isWithinBounds(float sceneLimit) const {
 }
 
 // Safe rotation methods that check bounds before applying rotation
-bool Block::tryRotateX(float sceneLimit) {
+#include "Board.h"
+
+bool Block::tryRotateX(float sceneLimit, const Board* board) {
     if (cubes.empty()) return false;
 
     // Create a temporary copy of cube positions
     std::vector<Cube> tempCubes = cubes;
-    
+
     float pivotY = tempCubes[0].y;
     float pivotZ = tempCubes[0].z;
 
@@ -282,10 +284,19 @@ bool Block::tryRotateX(float sceneLimit) {
 
     // Check if the rotated block would be within bounds
     for (const auto& cube : tempCubes) {
-        if (cube.x < -sceneLimit || cube.x > sceneLimit || 
+        if (cube.x < -sceneLimit || cube.x > sceneLimit ||
             cube.y < -sceneLimit || cube.y > sceneLimit ||
             cube.z < -sceneLimit || cube.z > sceneLimit) {
             return false; // Rotation would go out of bounds
+        }
+    }
+
+    // Check collision with parked blocks if board is provided
+    if (board) {
+        Block tempBlock(0,0,0,0);
+        tempBlock.cubes = tempCubes;
+        if (board->checkCollision(&tempBlock, 0.0f)) {
+            return false;
         }
     }
 
@@ -294,12 +305,12 @@ bool Block::tryRotateX(float sceneLimit) {
     return true;
 }
 
-bool Block::tryRotateY(float sceneLimit) {
+bool Block::tryRotateY(float sceneLimit, const Board* board) {
     if (cubes.empty()) return false;
 
     // Create a temporary copy of cube positions
     std::vector<Cube> tempCubes = cubes;
-    
+
     float pivotX = tempCubes[0].x;
     float pivotZ = tempCubes[0].z;
 
@@ -317,10 +328,19 @@ bool Block::tryRotateY(float sceneLimit) {
 
     // Check if the rotated block would be within bounds
     for (const auto& cube : tempCubes) {
-        if (cube.x < -sceneLimit || cube.x > sceneLimit || 
+        if (cube.x < -sceneLimit || cube.x > sceneLimit ||
             cube.y < -sceneLimit || cube.y > sceneLimit ||
             cube.z < -sceneLimit || cube.z > sceneLimit) {
             return false; // Rotation would go out of bounds
+        }
+    }
+
+    // Check collision with parked blocks if board is provided
+    if (board) {
+        Block tempBlock(0,0,0,0);
+        tempBlock.cubes = tempCubes;
+        if (board->checkCollision(&tempBlock, 0.0f)) {
+            return false;
         }
     }
 
@@ -329,12 +349,12 @@ bool Block::tryRotateY(float sceneLimit) {
     return true;
 }
 
-bool Block::tryRotateZ(float sceneLimit) {
+bool Block::tryRotateZ(float sceneLimit, const Board* board) {
     if (cubes.empty()) return false;
 
     // Create a temporary copy of cube positions
     std::vector<Cube> tempCubes = cubes;
-    
+
     float pivotX = tempCubes[0].x;
     float pivotY = tempCubes[0].y;
 
@@ -352,10 +372,19 @@ bool Block::tryRotateZ(float sceneLimit) {
 
     // Check if the rotated block would be within bounds
     for (const auto& cube : tempCubes) {
-        if (cube.x < -sceneLimit || cube.x > sceneLimit || 
+        if (cube.x < -sceneLimit || cube.x > sceneLimit ||
             cube.y < -sceneLimit || cube.y > sceneLimit ||
             cube.z < -sceneLimit || cube.z > sceneLimit) {
             return false; // Rotation would go out of bounds
+        }
+    }
+
+    // Check collision with parked blocks if board is provided
+    if (board) {
+        Block tempBlock(0,0,0,0);
+        tempBlock.cubes = tempCubes;
+        if (board->checkCollision(&tempBlock, 0.0f)) {
+            return false;
         }
     }
 

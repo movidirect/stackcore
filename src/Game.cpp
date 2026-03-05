@@ -53,6 +53,7 @@ Game::Game()
     gameIsPaused = false;
     demoMode = false;
     showHelpWindow = false;
+    isFastDropping = false;
     
     // Inicializar el bot de IA
     bot = new BotAI(this);
@@ -188,6 +189,9 @@ void Game::handleEvents()
     }
 
     if (gameIsOver || gameIsPaused) return;
+    
+    // Bloquear inputs manuales durante la caída rápida visual
+    if (isFastDropping) return;
 
     float dx = 0.0f;
     float dy = 0.0f;
@@ -199,37 +203,41 @@ void Game::handleEvents()
 
     if (cmds.rotateX) {
         if (cmds.ctrlPressed) targetCameraAngleX += 15.0f;
-        else if (block) block->tryRotateX(SCENE_LIMIT);
+        else if (block) block->tryRotateX(SCENE_LIMIT, board);
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     if (cmds.rotateXRev) {
         if (cmds.ctrlPressed) targetCameraAngleX -= 15.0f;
-        else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateX(SCENE_LIMIT)) break; }
+        else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateX(SCENE_LIMIT, board)) break; }
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     
     if (cmds.rotateY) {
         if (cmds.ctrlPressed) targetCameraAngleY += 15.0f;
-        else if (block) block->tryRotateY(SCENE_LIMIT);
+        else if (block) block->tryRotateY(SCENE_LIMIT, board);
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     if (cmds.rotateYRev) {
         if (cmds.ctrlPressed) targetCameraAngleY -= 15.0f;
-        else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateY(SCENE_LIMIT)) break; }
+        else if (block) { for(int i=0; i<3; i++) if(!block->tryRotateY(SCENE_LIMIT, board)) break; }
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     
     if (cmds.rotateZ) {
-        if (block) block->tryRotateZ(SCENE_LIMIT);
+        if (block) block->tryRotateZ(SCENE_LIMIT, board);
         audioManager->playSound(KEY_PRESS_SOUND);
     }
     if (cmds.rotateZRev) {
-        if (block) { for(int i=0; i<3; i++) if(!block->tryRotateZ(SCENE_LIMIT)) break; }
+        if (block) { for(int i=0; i<3; i++) if(!block->tryRotateZ(SCENE_LIMIT, board)) break; }
         audioManager->playSound(KEY_PRESS_SOUND);
     }
 
     if (cmds.drop && block) {
-        dropBlock();
+        if (demoMode) {
+            dropBlock();
+        } else {
+            isFastDropping = true;
+        }
     }
 
     if (block && (dx != 0.0f || dy != 0.0f)) {
@@ -268,20 +276,22 @@ void Game::update()
     cameraAngleY += (targetCameraAngleY - cameraAngleY) * 0.1f;
 
     if (block && !gameIsOver && !gameIsPaused) {
-        // Use dynamic fall speed instead of constant
-        float dz = currentFallSpeed;
+        // Si estamos en caída rápida, la pieza cae 1 unidad entera por frame (súper veloz, visible al ojo)
+        float dz = isFastDropping ? MANUAL_DROP_SPEED : currentFallSpeed;
 
-        
         // Check if the block can move or if there's a collision
         if (!checkCollisionWithWalls(block, dz) && !board->checkCollision(block, dz)) {
             block->move(0.0f, 0.0f, dz);  // Move the block towards the back
+            if (isFastDropping) score += 2; // Hard drop bonus (frame by frame)
         } else {
-            // Collision detected: Park the block and generate a new one
+            // Collision detected:
+            if (isFastDropping) isFastDropping = false; // Parar animación manual
+            
+            // Llama a dropBlock, que instantáneamente parqueará el bloque (porque detectará colisión)
             dropBlock();
         }
     }
 }
-
 bool Game::checkCollisionWithWalls(Block* block, float dz) 
 {
     for (const auto& cube : block->cubes) {
@@ -312,7 +322,7 @@ void Game::moveBlockWithCollision(float dx, float dy)
 {
     bool canMove = true;
 
-    // Check if each cube in the block will remain within the limits
+    // First check bounds
     for (const auto& cube : block->cubes) {
         float newX = cube.x + dx;
         float newY = cube.y + dy;
@@ -323,7 +333,18 @@ void Game::moveBlockWithCollision(float dx, float dy)
         }
     }
 
-    // Move the block if all cubes are within limits
+    if (canMove) {
+        // Create a temporary block to check horizontal collisions
+        Block tempBlock = *block;
+        tempBlock.move(dx, dy, 0.0f);
+        
+        // Use dz=0 to check collision at the current z depth but new x,y position
+        if (board->checkCollision(&tempBlock, 0.0f)) {
+            canMove = false;
+        }
+    }
+
+    // Move the block if all cubes are within limits and no collision
     if (canMove) {
         block->move(dx, dy, 0.0f);
         currentBlockX += dx;
@@ -346,6 +367,7 @@ void Game::resetGame(bool clearAll)
     stackPosition = -1;
     gameIsOver = false;
     gameIsPaused = false;
+    isFastDropping = false;
     block = new Block(0.0f, 0.0f, initZ, getNextBlockType());
     if (bot) bot->reset();
     currentBlockX = 0.0f;

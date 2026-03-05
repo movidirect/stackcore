@@ -21,6 +21,8 @@
 #include <cstdlib>
 #include "Cube.h"
 
+class Board;
+
 class Block {
 public:
     std::vector<Cube> cubes;
@@ -34,9 +36,9 @@ public:
     void rotateZ();
     
     // New methods for safe rotation with bounds checking
-    bool tryRotateX(float sceneLimit);
-    bool tryRotateY(float sceneLimit);
-    bool tryRotateZ(float sceneLimit);
+    bool tryRotateX(float sceneLimit, const Board* board = nullptr);
+    bool tryRotateY(float sceneLimit, const Board* board = nullptr);
+    bool tryRotateZ(float sceneLimit, const Board* board = nullptr);
     bool isWithinBounds(float sceneLimit) const;
     
     int getBlockCount() const { return blockCount; }
