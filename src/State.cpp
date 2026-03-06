@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ State::State()
     rlImGuiSetup(true);
 
     ImGuiIO& io = ImGui::GetIO();
-    // Usamos Roboto para una interfaz limpia, legible y profesional
+    // Use Roboto for a clean, readable, professional interface
     myFont = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 16.0f);
     smallFont = io.Fonts->AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 14.0f);
     
@@ -65,7 +65,7 @@ void State::draw(int stackPosition, int score, int highScore, int blocksPlaced, 
     style.ScrollbarRounding = 6.0f;
     style.ChildRounding = 6.0f;
 
-    // Color azulado principal único para paneles (fondo y borde iguales = mismo color)
+    // Single main bluish color for panels (same fill and border)
     const ImVec4 mainPanelColor = ImVec4(0.05f, 0.08f, 0.14f, 0.94f);
 
     ImVec4* colors = style.Colors;
@@ -165,7 +165,7 @@ void State::drawOverlayImages(bool /*gameIsOver*/, bool /*gameIspaused*/)
 
 void State::showImageInImGui(const char* /*name*/, Texture2D* texture, ImVec2 /*position*/, ImVec2 size)
 {
-    // Usa la macro rlImGuiImageSize para dibujar la textura dentro del panel actual de ImGui
+    // Use rlImGuiImageSize macro to draw texture inside current ImGui panel
     rlImGuiImageSize(texture, (int)size.x, (int)size.y);
 }
 
@@ -185,7 +185,7 @@ void State::render()
 
 void State::drawGameStats(int level, int linesCleared, int linesTarget, float currentSpeed)
 {
-    ImGui::SetCursorPos(ImVec2(10, 160)); // Subido de 175
+    ImGui::SetCursorPos(ImVec2(10, 160)); // Position raised from 175
     ImGui::Text("--- GAME STATUS ---");
 
     ImGui::SetCursorPos(ImVec2(10, 178));
@@ -200,7 +200,7 @@ void State::drawGameStats(int level, int linesCleared, int linesTarget, float cu
 
 void State::drawScoreInfo(int score, int highScore, int blocks, int cubes)
 {
-    ImGui::SetCursorPos(ImVec2(10, 225)); // Subido de 250
+    ImGui::SetCursorPos(ImVec2(10, 225)); // Position raised from 250
     ImGui::Text("--- STATISTICS ----");
 
     ImGui::SetCursorPos(ImVec2(10, 243));
@@ -218,7 +218,7 @@ void State::drawScoreInfo(int score, int highScore, int blocks, int cubes)
 
 void State::drawNextBlocksPreview(const std::vector<int>* nextBlocks)
 {
-    ImGui::SetCursorPos(ImVec2(10, 305)); // Subido de 340
+    ImGui::SetCursorPos(ImVec2(10, 305)); // Position raised from 340
     ImGui::Text("--- NEXT BLOCKS ---");
 
     if (nextBlocks && nextBlocks->size() >= 3) {
@@ -236,7 +236,7 @@ void State::drawNextBlocksPreview(const std::vector<int>* nextBlocks)
 
 void State::drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool showGhost, bool demoMode)
 {
-    ImGui::SetCursorPos(ImVec2(10, 375)); // Subido de 415
+    ImGui::SetCursorPos(ImVec2(10, 375)); // Position raised from 415
     ImGui::Text("---- SETTINGS  ----");
 
     ImGui::SetCursorPos(ImVec2(10, 393));
@@ -257,7 +257,7 @@ void State::drawGameStatus(bool gameIsOver, bool paused, bool soundEnabled, bool
 
 void State::drawControlsHelp()
 {
-    ImGui::SetCursorPos(ImVec2(10, 445)); // Subido de 490
+    ImGui::SetCursorPos(ImVec2(10, 445)); // Position raised from 490
     ImGui::Text("---- CONTROLS -----");
 
     if (smallFont) ImGui::PushFont(smallFont);
@@ -301,7 +301,7 @@ void State::drawEnhancedStackIndicator(int stackPosition, bool gameIsOver)
     int maxLevel = stackPosition; // Maximum level with blocks
     
     // Get current time for pulsing effects
-    float time = (float)GetTime(); // Usa GetTime() de Raylib
+    float time = (float)GetTime(); // Use Raylib's GetTime()
     
     // Draw 10 levels: from level 9 (top) to level 0 (bottom)
     for (int level = 9; level >= 0; level--) {

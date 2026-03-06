@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 #ifndef BOTAI_H
 #define BOTAI_H

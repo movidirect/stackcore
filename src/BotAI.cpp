@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 #include "BotAI.h"
 #include "Game.h"
@@ -22,7 +22,7 @@ void BotAI::reset() {
 }
 
 float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const bool baseGrid[9][9][14]) {
-    // OPTIMIZACIÓN: Copiar grid base O(1) y añadir cubos caídos
+    // OPTIMIZATION: Copy base grid O(1) and add dropped cubes
     bool currentGrid[9][9][14];
     std::copy(&baseGrid[0][0][0], &baseGrid[0][0][0] + 9 * 9 * 14, &currentGrid[0][0][0]);
     
@@ -50,7 +50,7 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const boo
     int bumpiness = 0;
     int blocksInBottomLevels = 0;
     
-    // Perfil de alturas de cada columna
+    // Height profile per column
     int heights[9][9] = {0};
     
     for (int x = 0; x < 9; ++x) {
@@ -59,7 +59,7 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const boo
         }
     }
 
-    // Analizar columnas para encontrar huecos y alturas
+    // Analyze columns to find holes and heights
     for (int x = -4; x <= 4; ++x) {
         for (int y = -4; y <= 4; ++y) {
             bool blockFound = false;
@@ -83,7 +83,7 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const boo
         }
     }
     
-    // Analizar Bumpiness
+    // Analyze bumpiness
     for (int x = 0; x < 9; ++x) {
         for (int y = 0; y < 9; ++y) {
             if (x < 8) bumpiness += std::abs(heights[x][y] - heights[x+1][y]);
@@ -91,14 +91,14 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const boo
         }
     }
     
-    // Evaluar qué tan profundas cayeron las piezas de este turno
+    // Evaluate how deep the pieces landed this turn
     float piecesDepthScore = 0.0f;
     for (const auto& cube : droppedCubes) {
         float z = Utils::round(cube.z);
         piecesDepthScore += (5.0f - z) * 500.0f; 
     }
 
-    // Evaluar niveles completados o rellenados en el fondo
+    // Evaluate completed or filled levels at the bottom
     int fullLinesBonus = 0;
     for (int z = -4; z <= maxZ; ++z) {
         int blocksInLevel = 0;
@@ -121,7 +121,7 @@ float BotAI::evaluateBoardState(const std::vector<Cube>& droppedCubes, const boo
     }
 
     float heightWeight    = -500.0f; 
-    float holesWeight     = -2000.0f; // Castigo MASIVO pero no infinito para permitir jugar
+    float holesWeight     = -2000.0f; // MASSIVE penalty but not infinite to allow play
     float bumpinessWeight = -100.0f;  
     float bottomFillWeight= 200.0f;  
     
@@ -143,7 +143,7 @@ void BotAI::calculateBestMove() {
     aiTargetRotY = 0;
     aiTargetRotZ = 0;
 
-    // OPTIMIZACIÓN: Cache del estado del tablero en un arreglo 3D O(1)
+    // OPTIMIZATION: Cache board state in 3D array O(1)
     bool baseGrid[9][9][14] = {false};
     for (const auto& pos : game->board->getOccupiedPositions()) {
         int x = std::get<0>(pos) + 4;
@@ -154,7 +154,7 @@ void BotAI::calculateBestMove() {
         }
     }
 
-    // OPTIMIZACIÓN: Cache de geometrías para evitar simular rotaciones redundantes
+    // OPTIMIZATION: Cache geometries to avoid simulating redundant rotations
     std::set<std::vector<std::tuple<int, int, int>>> seenGeometries;
 
     for (int rX = 0; rX < 4; ++rX) {
@@ -164,18 +164,18 @@ void BotAI::calculateBestMove() {
                 Block testBlock(0.0f, 0.0f, game->initZ, 0); 
                 testBlock.cubes = game->block->cubes;
                 
-                // Aplicar rotaciones asegurando que el motor físico real lo permita
+                // Apply rotations ensuring the real physics engine allows it
                 bool rotationPossible = true;
                 for(int i=0; i<rX; i++) { if (!testBlock.tryRotateX(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
                 for(int i=0; i<rY; i++) { if (!testBlock.tryRotateY(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
                 for(int i=0; i<rZ; i++) { if (!testBlock.tryRotateZ(game->SCENE_LIMIT, game->board)) rotationPossible = false; }
                 
-                // Si la combinación de giros no es físicamente posible en el punto de spawn, descartarla
+                // If rotation combo is not physically possible at spawn, discard it
                 if (!rotationPossible) continue;
                 
                 if (!testBlock.isWithinBounds(game->SCENE_LIMIT)) continue;
                 
-                // Generar la firma única (geometría) de esta rotación
+                // Generate unique signature (geometry) for this rotation
                 std::vector<std::tuple<int, int, int>> geometrySignature;
                 for (const auto& c : testBlock.cubes) {
                     geometrySignature.push_back(std::make_tuple(
@@ -186,7 +186,7 @@ void BotAI::calculateBestMove() {
                 }
                 std::sort(geometrySignature.begin(), geometrySignature.end());
                 
-                // Si esta forma exacta ya la probamos, saltarla
+                // If we already tried this exact shape, skip it
                 if (seenGeometries.find(geometrySignature) != seenGeometries.end()) {
                     continue; 
                 }
@@ -197,12 +197,12 @@ void BotAI::calculateBestMove() {
                         Block transBlock = testBlock;
                         transBlock.move(dx, dy, 0.0f);
 
-                        // Verificar colisiones horizontales iniciales
+                        // Check initial horizontal collisions
                         if (!transBlock.isWithinBounds(game->SCENE_LIMIT) || game->board->checkCollision(&transBlock, 0.0f)) {
                             continue;
                         }
 
-                        // Simular caída libre (Ghost block logic)
+                        // Simulate free fall (ghost block logic)
                         while (true) {
                             if (game->checkCollisionWithWalls(&transBlock, game->MANUAL_DROP_SPEED) ||
                                 game->board->checkCollision(&transBlock, game->MANUAL_DROP_SPEED)) {
@@ -211,17 +211,17 @@ void BotAI::calculateBestMove() {
                             transBlock.move(0.0f, 0.0f, game->MANUAL_DROP_SPEED);
                         }
                         
-                        // Evaluar el tablero resultante
+                        // Evaluate resulting board
                         float score = evaluateBoardState(transBlock.cubes, baseGrid);
                         
-                        // Desempate: preferir movimientos que lleven el bloque más al fondo
+                        // Tie-break: prefer moves that place the block deeper
                         float minDroppedZ = 4.0f;
                         for(const auto& c : transBlock.cubes) {
                             if(c.z < minDroppedZ) minDroppedZ = c.z;
                         }
                         score -= minDroppedZ * 0.5f; 
 
-                        // Guardar la mejor jugada
+                        // Save best move
                         if (score > bestScore) {
                             bestScore = score;
                             aiTargetX = dx;
@@ -244,23 +244,23 @@ void BotAI::calculateBestMove() {
 
 void BotAI::update()
 {
-    // Limpiar comandos anteriores
+    // Clear previous commands
     botCommands = {false, false, false, false, false, false, false, false, false, false, false};
     
     if (game->gameIsOver || game->gameIsPaused || !game->block) return;
 
     if (!aiTargetCalculated) {
         calculateBestMove();
-        return; // Esperar un frame tras calcular
+        return; // Wait one frame after computing
     }
 
     botTimer++;
     
-    // Actuar cada N frames para que se vea la animación de la IA jugando
-    // Ajustado a 4 para que sea veloz y no lo alcance la gravedad normal antes de colocarse
+    // Act every N frames so AI animation is visible
+    // Set to 4 so it is fast and gravity does not catch up before placement
     if (botTimer % 4 != 0) return; 
 
-    // 1. Ejecutar Rotaciones primero
+    // 1. Execute rotations first
     if (currentRotX != aiTargetRotX) {
         botCommands.rotX = true;
         currentRotX = (currentRotX + 1) % 4;
@@ -277,8 +277,8 @@ void BotAI::update()
         return;
     }
 
-    // 2. Ejecutar Traslaciones (X e Y)
-    // Se compara con tolerancia de punto flotante
+    // 2. Execute translations (X and Y)
+    // Compare with floating-point tolerance
     if (game->currentBlockX < aiTargetX - 0.1f) {
         botCommands.right = true;
         return;
@@ -295,7 +295,7 @@ void BotAI::update()
         return;
     }
 
-    // 3. Drop (Soltar cuando ya está alineado)
+    // 3. Drop (release when aligned)
     botCommands.drop = true;
-    aiTargetCalculated = false; // Forzar recalculo para la siguiente pieza
+    aiTargetCalculated = false; // Force recompute for next piece
 }

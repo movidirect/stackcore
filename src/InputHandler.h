@@ -34,6 +34,13 @@ public:
     ~InputHandler();
 
     GameCommands getPlayerCommands();
+
+private:
+    bool isGamepadButtonRepeat(int button);
+    
+    // Gamepad repeat logic state
+    float gamepadRepeatTimers[GAMEPAD_BUTTON_LEFT_THUMB + 1]; 
+    float lastGamepadRepeatTime = 0.0f;
 };
 
 #endif // INPUTHANDLER_H

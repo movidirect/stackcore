@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ Game::Game()
     showHelpWindow = false;
     isFastDropping = false;
     
-    // Inicializar el bot de IA
+    // Initialize the AI bot
     bot = new BotAI(this);
     
     // Initialize configuration variables
@@ -144,7 +144,7 @@ void Game::handleEvents()
 {
     GameCommands cmds = inputHandler->getPlayerCommands();
 
-    // Si estamos en modo demo, sobreescribimos con las del bot
+    // In demo mode, override with bot commands
     if (demoMode) {
         bot->update();
         auto botCmds = bot->getCommands();
@@ -161,7 +161,7 @@ void Game::handleEvents()
         cmds.drop       = botCmds.drop;
     }
 
-    // Teclas globales
+    // Global keys
     if (cmds.toggleDemo) {
         demoMode = !demoMode;
         if (demoMode) {
@@ -190,7 +190,7 @@ void Game::handleEvents()
 
     if (gameIsOver || gameIsPaused) return;
     
-    // Bloquear inputs manuales durante la caída rápida visual
+    // Block manual input during visual fast drop
     if (isFastDropping) return;
 
     float dx = 0.0f;
@@ -276,7 +276,7 @@ void Game::update()
     cameraAngleY += (targetCameraAngleY - cameraAngleY) * 0.1f;
 
     if (block && !gameIsOver && !gameIsPaused) {
-        // Si estamos en caída rápida, la pieza cae 1 unidad entera por frame (súper veloz, visible al ojo)
+        // During fast drop, piece moves 1 full unit per frame (very fast, visible)
         float dz = isFastDropping ? MANUAL_DROP_SPEED : currentFallSpeed;
 
         // Check if the block can move or if there's a collision
@@ -285,9 +285,9 @@ void Game::update()
             if (isFastDropping) score += 2; // Hard drop bonus (frame by frame)
         } else {
             // Collision detected:
-            if (isFastDropping) isFastDropping = false; // Parar animación manual
+            if (isFastDropping) isFastDropping = false; // Stop manual animation
             
-            // Llama a dropBlock, que instantáneamente parqueará el bloque (porque detectará colisión)
+            // Call dropBlock to immediately park the block (collision detected)
             dropBlock();
         }
     }

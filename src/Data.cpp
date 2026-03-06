@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ void Data::loadGameState(
         return;
     }
     
-    // Limpiar estado actual con verificación de null pointers
+    // Clear current state with null pointer checks
     for (auto block : parkedBlocks) {
         if (block) {  // Check for null pointer before delete
             delete block;
@@ -80,7 +80,7 @@ void Data::loadGameState(
     parkedBlocks.clear();
     occupiedPositions.clear();
     
-    // Cargar variables de estado
+    // Load state variables
     file.read(reinterpret_cast<char*>(&score), sizeof(score));
     file.read(reinterpret_cast<char*>(&blockCount), sizeof(blockCount));
     file.read(reinterpret_cast<char*>(&cubeCount), sizeof(cubeCount));
@@ -88,7 +88,7 @@ void Data::loadGameState(
     file.read(reinterpret_cast<char*>(&gameIsOver), sizeof(gameIsOver));
     file.read(reinterpret_cast<char*>(&gameIsPaused), sizeof(gameIsPaused));
     
-    // Cargar bloques parqueados
+    // Load parked blocks
     size_t blockCountt;
     file.read(reinterpret_cast<char*>(&blockCountt), sizeof(blockCountt));
     
@@ -96,8 +96,8 @@ void Data::loadGameState(
         size_t cubeCountt;
         file.read(reinterpret_cast<char*>(&cubeCountt), sizeof(cubeCountt));
         
-        Block* block = new Block(0.0f, 0.0f, 0.0f); // Crear nuevo bloque con floats
-        block->cubes.clear(); // Limpiar cubos por defecto
+        Block* block = new Block(0.0f, 0.0f, 0.0f); // Create new block with floats
+        block->cubes.clear(); // Clear default cubes
         
         for (size_t j = 0; j < cubeCountt; j++) {
             float x, y, z;
@@ -132,7 +132,7 @@ void Data::loadGameState(
 
     std::ofstream file("game_state.dat", std::ios::binary);
     
-    // Guardar variables de estado
+    // Save state variables
     file.write(reinterpret_cast<char*>(&score), sizeof(score));
     file.write(reinterpret_cast<char*>(&blockCount), sizeof(blockCount));
     file.write(reinterpret_cast<char*>(&cubeCount), sizeof(cubeCount));
@@ -140,7 +140,7 @@ void Data::loadGameState(
     file.write(reinterpret_cast<char*>(&gameIsOver), sizeof(gameIsOver));
     file.write(reinterpret_cast<char*>(&gameIsPaused), sizeof(gameIsPaused));
     
-    // Guardar bloques parqueados con verificación de null pointers
+    // Save parked blocks with null pointer checks
     size_t blockCountt = parkedBlocks.size();
     file.write(reinterpret_cast<char*>(&blockCountt), sizeof(blockCountt));
     

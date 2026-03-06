@@ -1,5 +1,5 @@
 // Stackcore
-// Copyright (C) 2023-2025 Jose R Arenas
+// Copyright (C) 2023-2026 Jose R Arenas
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ class Game {
         bool isRunning;
         bool demoMode;           // Variable para el modo IA
         bool showHelpWindow;     // Ventana de ayuda
-        bool isFastDropping;     // Flag para visualizar la caída rápida bloqueando inputs
+        bool isFastDropping;     // Flag to show fast drop by blocking input
         
         float currentBlockX;
         float currentBlockY;

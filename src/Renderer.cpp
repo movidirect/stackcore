@@ -145,8 +145,8 @@ void Renderer::drawGrid() {
     float size = SCENE_LIMIT;
     float cellSize = CELL_SIZE;
     int gridCount = GRID_SIZE;
-    ::Color gridColor = {0, 255, 255, 160}; // Cyan más sólido
-    ::Color sideGridColor = {0, 255, 255, 100}; // Mucho más visible que antes (era 40)
+    ::Color gridColor = {0, 255, 255, 160}; // More solid cyan
+    ::Color sideGridColor = {0, 255, 255, 100}; // Much more visible than before (was 40)
 
     // Render floor (XZ plane at y = -size)
     for (int i = 0; i <= gridCount; ++i) {
